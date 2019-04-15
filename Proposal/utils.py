@@ -69,3 +69,12 @@ def calculate_recall_score(y_true, y_pred):
         The best value is 1 and the worst value is 0.
     '''
     return recall_score(y_true, y_pred)
+
+def calculate_confusion_matrix(y_true, y_pred):
+    '''
+        Compute confusion matrix to evaluate the accuracy of a classification
+
+        By definition a confusion matrix
+        is such that is equal to the number of observations known to be in group but predicted to be in group
+    '''
+    return confusion_matrix(y_true, y_pred)

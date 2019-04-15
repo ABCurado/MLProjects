@@ -1,5 +1,6 @@
 from sklearn.linear_model   import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 def logistic_regression(X_train, y_train ):
     logit_model = LogisticRegression()  
@@ -8,5 +9,10 @@ def logistic_regression(X_train, y_train ):
 
 def decision_tree(X_train, y_train):
     tree = DecisionTreeClassifier()
+    tree.fit(X_train, y_train)
+    return tree
+
+def KNN(X_train, y_train):
+    tree = KNeighborsClassifier()
     tree.fit(X_train, y_train)
     return tree
