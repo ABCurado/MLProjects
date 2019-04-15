@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
+from sklearn.model_selection import KFold
 
 def get_dataset():
     '''
@@ -24,6 +25,14 @@ def data_split(df, test_size=0.33,random_state=42):
     y = df["Response"]
     X = df.loc[:, df.columns != "Response"] 
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+def X_y_split(df):
+    '''
+        Selects the outcome variable and calls sklearn trai_test_split
+    '''
+    y = df["Response"]
+    X = df.loc[:, df.columns != "Response"] 
+    return (X, y)
 
 def calculate_accuracy(y_true, y_pred):
     '''
@@ -78,3 +87,14 @@ def calculate_confusion_matrix(y_true, y_pred):
         is such that is equal to the number of observations known to be in group but predicted to be in group
     '''
     return confusion_matrix(y_true, y_pred)
+
+def cross_validation_average_results(model, X, y, n_splits=5):
+    kf = KFold(n_splits=n_splits)
+    predictions = []
+    for train_index, test_index in kf.split(X):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, _ = y.iloc[train_index], y.iloc[test_index]
+        estimator = model(X_train, y_train)
+        prediction = estimator.predict(X_test)
+        predictions.extend(prediction)
+    return predictions

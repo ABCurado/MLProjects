@@ -1,6 +1,6 @@
 import pandas as pd
-from sklearn.preprocessing import  OneHotEncoder, LabelEncoder
-
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import MinMaxScaler
 def convert_to_boolean(df):
     '''
         Converts all possible columns to type np.bool
@@ -55,3 +55,11 @@ def encode_days_as_costumer(df):
     ).dt.days
     return dataframe
 
+def min_max_scale(df, columns=[]):
+    scaler = MinMaxScaler()
+    if columns == []:
+        scaler.fit(df)
+    else: 
+        scaler.fit(df[columns])
+
+    return scaler
