@@ -4,6 +4,7 @@ from sklearn.impute import SimpleImputer
 import numpy as np
 from math import sqrt
 import feature_engineering
+from imblearn.over_sampling import SMOTE, ADASYN
 
 def convert_to_boolean(df):
     '''
@@ -191,3 +192,21 @@ def random_oversampling(X, ratio, seed):
     # shuffle the dataframe and reset the index
     X_f = X_f.sample(frac=1).reset_index(drop=True)
     return X_f
+
+
+def SMOTE(X, y):
+    # input DataFrame
+    # X →Independent Variable in DataFrame\
+    # y →dependent Variable in Pandas DataFrame format
+    sm = SMOTE()
+    X, y = sm.fit_sample(X, y)
+    return X, y
+
+
+def ADASYN(X, y):
+    # input DataFrame
+    # X →Independent Variable in DataFrame\
+    # y →dependent Variable in Pandas DataFrame format
+    sm = ADASYN()
+    X, y = sm.fit_sample(X, y)
+    return (X, y)
