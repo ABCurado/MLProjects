@@ -3,6 +3,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import SimpleImputer
 import numpy as np
 from math import sqrt
+import feature_engineering
 
 def convert_to_boolean(df):
     '''
@@ -77,7 +78,7 @@ def missing_imputer(df, column, strategy= "median"):
     else:
         print("Chose a valid strategy!")
 
-    df[column] = df[column].apply(lambda x: x if x != np.nan else value)
+    df.loc[df[column].isna()==True, column] = value
 #    imp = SimpleImputer(missing_values=np.nan, strategy=strategy)
 #    df[column] = imp.fit_transform(df[column])
     return df
@@ -115,7 +116,31 @@ def anomalies_treatment(df, column, anomalies):
     """
     Cuts off the anomalies given.
     """
-    return df.loc[df[column] != anomalies, :]
+    return df.loc[~df[column].isin(anomalies), :]
+
+## Mortens Preprocessing Pipeline
+##  (Feel Free to use it, if you change it, please let me know)
+
+def morten_preprocessing_pipeline(df):
+    """
+    One-Version of a Preprocessing Pipeline. Decisions are justified in Data_CLeaning.ipynb.
+    """
+    df = remove_birthyear(df, 1940)
+    df = missing_imputer(df, "Income", "median")
+    df = outlier_cutoff(df, "MntSweetProducts", 210)
+    df = outlier_cutoff(df, "MntMeatProducts", 1250)
+    df = outlier_cutoff(df, "MntGoldProds", 250)
+    df = outlier_value_imputer(df, "NumWebPurchases", 11, 11)
+    df = outlier_value_imputer(df, "NumCatalogPurchases", 11, 11)
+    df = outlier_value_imputer(df, "NumWebVisitsMonth", 9, 9)
+    df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
+    df = encode_education(df)
+    df = one_hot_encoding(df, columns=["Marital_Status"])
+    df = encode_days_as_costumer(df)
+    df = feature_engineering.drop_useless_columns(df)
+    del df["Complain"]
+    return df
+
 
 
 ## Over and Undersampling Methods
