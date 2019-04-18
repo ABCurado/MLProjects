@@ -5,6 +5,7 @@ import numpy as np
 from math import sqrt
 import feature_engineering
 from imblearn.over_sampling import SMOTE, ADASYN
+from sklearn.neighbors import KNeighborsClassifier
 
 def convert_to_boolean(df):
     '''
@@ -97,6 +98,24 @@ def missing_imputer(df, column, strategy= "median"):
 #    imp = SimpleImputer(missing_values=np.nan, strategy=strategy)
 #    df[column] = imp.fit_transform(df[column])
     return df
+
+def impute_income_KNN(df):
+    """
+    imputes the missing income values by using a KNN approach, it might yield closer results instead of using the median imputer
+    """
+    dataframe = df.copy()
+    dataframe_c = dataframe.dropna().select_dtypes(include=["number"]).drop(["Response"], axis = 1)
+    dataframe_i = dataframe[pd.isnull(dataframe).any(axis=1)].select_dtypes(include=["number"]).drop(["Response"], axis = 1)
+    clf = KNeighborsClassifier(3, weights='uniform', metric = 'euclidean')
+    trained_model = clf.fit(dataframe_c.drop(["Income"],axis=1), dataframe_c.loc[:,'Income'])
+    imputed_values = trained_model.predict(dataframe_i.drop(["Income"], axis=1))
+    #print(imputed_values)
+    dataframe_i["Income"] = imputed_values
+    dataframe_new = pd.concat([dataframe_i, dataframe_c])
+    dataframe_new = dataframe_new.sort_index()
+    dataframe["Income"] = dataframe_new["Income"]
+    return dataframe
+
 
 def replace_income(df):
     """
