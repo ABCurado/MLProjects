@@ -60,8 +60,22 @@ def encode_days_as_costumer(df):
     ).dt.days
     return dataframe
 
-## Outlier Treatment and Imputation Methods
 
+
+def to_dtype_object(df):
+    '''
+        Changes columns with 0 or 1 values to an object
+    '''
+    dataframe = df.copy()
+    #df[columns] = df[columns].astype("object")
+    dataframe["AcceptedCmp3"] = dataframe["AcceptedCmp3"].astype("object")
+    dataframe["AcceptedCmp1"] = dataframe["AcceptedCmp1"].astype("object")
+    dataframe["AcceptedCmp2"] = dataframe["AcceptedCmp2"].astype("object")
+    dataframe["AcceptedCmp4"] = dataframe["AcceptedCmp4"].astype("object")
+    dataframe["AcceptedCmp5"] = dataframe["AcceptedCmp5"].astype("object")
+    dataframe["Complain"] = dataframe["Complain"].astype("object")
+    return dataframe
+    
 def remove_birthyear(df, cutoff):
     """
         Removes all instances with Birth Year < cutoff and returns the dataframe.
@@ -118,6 +132,39 @@ def anomalies_treatment(df, column, anomalies):
     Cuts off the anomalies given.
     """
     return df.loc[~df[column].isin(anomalies), :]
+
+def outlier_IQR(df, columns=["Year_Birth","Income"]):
+    """
+    outlier deletetion using the IQR, you can choose the variables you want to delete the outliers for by selecting the columns. The default is Year_Birth & Income. Also you can change the quantile values.
+    """
+    dataframe = df.copy()
+    Q1 = dataframe[columns].quantile(0.25)
+    Q3 = dataframe[columns].quantile(0.75)
+    IQR = Q3 - Q1
+    #print(IQR)
+    dataframe[columns] = dataframe[columns][~((dataframe < (Q1 - 2 * IQR)) |(dataframe > (Q3 + 2 * IQR))).any(axis=1)]
+    dataframe = dataframe.dropna()
+    print('Removing outliers using the IQR method with 2 quartiles would lead to a change of data size: ',(dataframe.shape[0] -df.shape[0]) /df.shape[0])
+    return dataframe
+
+
+def outlier_ZSCORE(df, columns=["Year_Birth", "Income"], threshold=3):
+    """
+    outlier deletion using the Zscore, you can choose which columns you want to apply it on and you can choose which threshold you want to use.
+    """
+    dataframe = df.copy()
+    columns_zscore = []
+    for i in dataframe[columns]:
+        i_zscore = i + "_zscore"
+        columns_zscore.append(str(i_zscore))
+
+        dataframe[i_zscore] = (dataframe[i] - dataframe[i].mean()) / df[i].std(ddof=0)
+    for i in dataframe[columns_zscore]:
+        dataframe = dataframe[(dataframe[i] < threshold) & (dataframe[i] > -threshold)]
+    dataframe = dataframe.drop(columns_zscore, axis=1)
+    print('Removing outliers using the ZSCORES method with a threshold of 3 would lead to a change of data size: ',
+          (dataframe.shape[0] - df.shape[0]) / df.shape[0])
+    return dataframe
 
 ## Mortens Preprocessing Pipeline
 ##  (Feel Free to use it, if you change it, please let me know)
