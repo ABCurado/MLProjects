@@ -183,9 +183,11 @@ def morten_preprocessing_pipeline(df):
     df = outlier_value_imputer(df, "NumWebVisitsMonth", 9, 9)
     df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
     df = encode_education(df)
+    df = feature_engineering.partner_binary(df)
     df = one_hot_encoding(df, columns=["Marital_Status"])
     df = encode_days_as_costumer(df)
     df = feature_engineering.drop_useless_columns(df)
+    df = feature_engineering.responsiveness_share(df)
     del df["Complain"]
     return df
 
@@ -241,7 +243,7 @@ def random_oversampling(X, ratio, seed):
     return X_f
 
 
-def SMOTE(X, y):
+def SMOTE_oversampling(X, y):
     # input DataFrame
     # X →Independent Variable in DataFrame\
     # y →dependent Variable in Pandas DataFrame format
@@ -250,7 +252,7 @@ def SMOTE(X, y):
     return X, y
 
 
-def ADASYN(X, y):
+def ADASYN_oversampling(X, y):
     # input DataFrame
     # X →Independent Variable in DataFrame\
     # y →dependent Variable in Pandas DataFrame format
