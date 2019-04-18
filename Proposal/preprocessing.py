@@ -55,3 +55,19 @@ def encode_days_as_costumer(df):
     ).dt.days
     return dataframe
 
+def to_dtype_object(df):
+    '''
+        Changes columns with 0 or 1 values to an object
+    '''
+    dataframe = df.copy()
+    #df[columns] = df[columns].astype("object")
+    dataframe["AcceptedCmp3"] = dataframe["AcceptedCmp3"].astype("object")
+    dataframe["AcceptedCmp1"] = dataframe["AcceptedCmp1"].astype("object")
+    dataframe["AcceptedCmp2"] = dataframe["AcceptedCmp2"].astype("object")
+    dataframe["AcceptedCmp4"] = dataframe["AcceptedCmp4"].astype("object")
+    dataframe["AcceptedCmp5"] = dataframe["AcceptedCmp5"].astype("object")
+    dataframe["Complain"] = dataframe["Complain"].astype("object")
+
+    return dataframe
+
+

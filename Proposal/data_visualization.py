@@ -2,6 +2,92 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+
+import seaborn as sns
+
+def univariate_outlier_id_plot(df):
+    df_num = df.select_dtypes(include=["number"]).drop(["Response"], axis = 1)
+    color = "gray"
+    fig = plt.figure(figsize=(8, 25))
+    i=1
+    for feature in df_num:
+        if feature == "Income":
+          ser = df_num[feature].copy()
+          ser.dropna(inplace=True)
+        else:
+          ser = df_num[feature]
+        ax = fig.add_subplot(df_num.shape[1], 2, i)
+        box = ax.boxplot(ser, flierprops=dict(markerfacecolor='r', marker='s'), vert=False, patch_artist=True)
+        box['boxes'][0].set_facecolor(color)
+        ax.set_title("Boxplot of "+feature)
+        ax = fig.add_subplot(df_num.shape[1], 2, i+1)
+        ax.hist(ser, density=1, bins=30, color=color, alpha=0.7, rwidth=0.85)
+        ax.set_title("Histogram of "+feature)
+        i+=2
+
+    plt.tight_layout()
+    plt.show()
+
+
+def filter_by_std(series_, n_stdev=3.0, return_thresholds=False):
+    mean_, stdev_ = series_.mean(), series_.std()
+    cutoff = stdev_ * n_stdev
+    lower_bound, upper_bound = mean_ - cutoff, mean_ + cutoff
+    if return_thresholds:
+        return lower_bound, upper_bound
+    else:
+        return [True if i < lower_bound or i > upper_bound else False for i in series_]
+
+
+def filter_by_iqr(series_, k=1.5, return_thresholds=False):
+    q25, q75 = np.percentile(series_, 25), np.percentile(series_, 75)
+    iqr = q75 - q25
+
+    cutoff = iqr * k
+    lower_bound, upper_bound = q25 - cutoff, q75 + cutoff
+
+    if return_thresholds:
+        return lower_bound, upper_bound
+    else:
+        return [True if i < lower_bound or i > upper_bound else False for i in series_]
+
+
+def plot_filter_by_stdev(df, feature, stdev_tuple=(3.0, 2.0), colors=("red", "yellow")):
+    df_num = df.select_dtypes(include=["number"]).drop(["Response"], axis=1)
+    sns.distplot(df_num[feature], kde=False, color="gray")
+    lower_bound_1, upper_bound_1 = filter_by_std(df_num[feature], n_stdev=stdev_tuple[0], return_thresholds=True)
+    lower_bound_2, upper_bound_2 = filter_by_std(df_num[feature], n_stdev=stdev_tuple[1], return_thresholds=True)
+    if df_num[feature].min() <= 0:
+        plt.axvspan(min(df_num[feature][df_num[feature] < lower_bound_1], default=df_num[feature].min()), lower_bound_1, alpha=0.2,
+                    color=colors[0])
+        plt.axvspan(min(df_num[feature][df_num[feature] < lower_bound_2], default=df_num[feature].min()), lower_bound_1, alpha=0.2,
+                    color=colors[1])
+    plt.axvspan(upper_bound_1, max(df_num[feature][df_num[feature] > upper_bound_1], default=df_num[feature].max()), alpha=0.2,
+                color=colors[0])
+    plt.axvspan(upper_bound_2, max(df_num[feature][df_num[feature] > upper_bound_2], default=df_num[feature].max()), alpha=0.2,
+                color=colors[1])
+    plt.title("Outliers in {} by {} and {} standard deviations:\n".format(feature, stdev_tuple[0], stdev_tuple[1]))
+
+
+
+def plot_filter_by_iqr(df, feature, k_tuple=(1.7, 1.2), colors=("red", "yellow")):
+    df_num = df.select_dtypes(include=["number"]).drop(["Response"], axis=1)
+    sns.distplot(df_num[feature], kde=False, color="gray")
+    lower_bound_1, upper_bound_1 = filter_by_iqr(df_num[feature], k=k_tuple[0], return_thresholds=True)
+    lower_bound_2, upper_bound_2 = filter_by_iqr(df_num[feature], k=k_tuple[1], return_thresholds=True)
+    if df_num[feature].min() <= 0:
+        plt.axvspan(min(df_num[feature][df_num[feature] < lower_bound_1], default=df_num[feature].min()), lower_bound_1, alpha=0.2,
+                    color=colors[0])
+        plt.axvspan(min(df_num[feature][df_num[feature] < lower_bound_2], default=df_num[feature].min()), lower_bound_1, alpha=0.2,
+                    color=colors[1])
+    plt.axvspan(upper_bound_1, max(df_num[feature][df_num[feature] > upper_bound_1], default=df_num[feature].max()), alpha=0.2,
+                color=colors[0])
+    plt.axvspan(upper_bound_2, max(df_num[feature][df_num[feature] > upper_bound_2], default=df_num[feature].max()), alpha=0.2,
+                color=colors[1])
+    plt.title("Outliers in {} by {} and {} k in IQR:\n".format(feature, k_tuple[0], k_tuple[1]))
+
 
 def plot_precision_recall_curve(recall, precision, auc):
     '''
