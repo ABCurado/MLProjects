@@ -78,3 +78,18 @@ def calculate_confusion_matrix(y_true, y_pred):
         is such that is equal to the number of observations known to be in group but predicted to be in group
     '''
     return confusion_matrix(y_true, y_pred)
+
+
+def profit_share(y_true, y_pred):
+    """
+    Computes the profit. For each True/True +8, for each True/False -3 and compares it with the possible profit.
+    E.g. 0.26 means, that one got 26% of the max possible profit.
+    """
+    score = 0
+    for i in (y_true - (y_pred * 2)):
+        if i == -1:
+            score += 8
+        elif i == -2:
+            score -= 3
+
+    return round(score / (sum(y_true) * 8), 2)
