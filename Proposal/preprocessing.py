@@ -1,5 +1,6 @@
 import pandas as pd
-from sklearn.preprocessing import  OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
 import numpy as np
 from math import sqrt
 
@@ -57,6 +58,67 @@ def encode_days_as_costumer(df):
     ).dt.days
     return dataframe
 
+## Outlier Treatment and Imputation Methods
+
+def remove_birthyear(df, cutoff):
+    """
+        Removes all instances with Birth Year < cutoff and returns the dataframe.
+    """
+    return df.loc[df["Year_Birth"]>cutoff, :]
+
+def missing_imputer(df, column, strategy= "median"):
+    """
+    Imputes the column of a dataframe based on the given strategy ("mean", "median").
+    """
+    if strategy == "median":
+        value = df.median()[column]
+    elif strategy == "mean":
+        value = df.mean()[column]
+    else:
+        print("Chose a valid strategy!")
+
+    df[column] = df[column].apply(lambda x: x if x != np.nan else value)
+#    imp = SimpleImputer(missing_values=np.nan, strategy=strategy)
+#    df[column] = imp.fit_transform(df[column])
+    return df
+
+def replace_income(df):
+    """
+    Replaces the 600k income guy with the median.
+    """
+    df.loc[df["Income"]>600000, "Income"] = df.median()["Income"]
+    return df
+
+def outlier_cutoff(df, column, upper_bound):
+    """
+    This method cuts off outliers smaller than the upper_bound.
+    """
+    return df.loc[df[column]<upper_bound,:]
+
+def outlier_imputer(df, column, upper_bound, strategy="median"):
+    """
+    This method imputes outliers based on the given bound and by means of the chosen strategy.
+    """
+    df.loc[df[column] > upper_bound, column] = np.nan
+    imp = SimpleImputer(missing_values=np.nan, strategy=strategy)
+    df[column] = imp.fit_transform(df[column])
+    return df
+
+def outlier_value_imputer(df, column, upper_bound, value):
+    """
+    This method imputes outliers based on the given bound and with a given value.
+    """
+    df.loc[df[column] > upper_bound, column] = value
+    return df
+
+def anomalies_treatment(df, column, anomalies):
+    """
+    Cuts off the anomalies given.
+    """
+    return df.loc[df[column] != anomalies, :]
+
+
+## Over and Undersampling Methods
 
 def centroid_undersampling(X, f):
     """
@@ -84,6 +146,23 @@ def centroid_undersampling(X, f):
 
     # concatenate all selected 0 labels with the 1 labels
     X_f = pd.concat([X_label.iloc[:int(f * X_label.shape[0]), :], X.loc[X["Response"]==1, :]])
+    # shuffle the dataframe and reset the index
+    X_f = X_f.sample(frac=1).reset_index(drop=True)
+    return X_f
+
+def random_oversampling(X, ratio, seed):
+    """
+    Implementation of random_oversampling.
+    :param X: df
+    :param ratio: ratio for oversampling
+    :return: new oversampled dataframe
+    """
+    # get subset of class 1 -> to be oversampled
+    X_label = X.loc[X["Response"]==1, :]
+    # oversample randomly based on ratio
+    X_label = X_label.sample(frac=ratio, replace=True, random_state=seed)
+    # concat with other class
+    X_f = pd.concat([X_label, X.loc[X["Response"]==0, :]])
     # shuffle the dataframe and reset the index
     X_f = X_f.sample(frac=1).reset_index(drop=True)
     return X_f
