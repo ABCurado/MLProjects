@@ -98,3 +98,18 @@ def cross_validation_average_results(model, X, y, n_splits=5):
         prediction = estimator.predict(X_test)
         predictions.extend(prediction)
     return predictions
+
+
+def profit_share(y_true, y_pred):
+    """
+    Computes the profit. For each True/True +8, for each True/False -3 and compares it with the possible profit.
+    E.g. 0.26 means, that one got 26% of the max possible profit.
+    """
+    score = 0
+    for i in (y_true - (y_pred * 2)):
+        if i == -1:
+            score += 8
+        elif i == -2:
+            score -= 3
+
+    return round(score / (sum(y_true) * 8), 2)

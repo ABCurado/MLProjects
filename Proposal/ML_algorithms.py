@@ -7,8 +7,8 @@ def logistic_regression(X_train, y_train ):
     logit_model.fit(X_train, y_train)  
     return logit_model
 
-def decision_tree(X_train, y_train):
-    tree = DecisionTreeClassifier()
+def decision_tree(X_train, y_train, criterion="gini", class_weight=None):
+    tree = DecisionTreeClassifier(criterion=criterion, class_weight=class_weight)
     tree.fit(X_train, y_train)
     return tree
 
