@@ -90,6 +90,21 @@ def calculate_confusion_matrix(y_true, y_pred):
     return confusion_matrix(y_true, y_pred)
 
 def cross_validation_average_results(model, X, y, n_splits=5):
+    '''
+        Does cross validation with n_splits and returns an array with y size as predictions.
+        !!!!Currently not working with transformations calculated on train data and applied in test data!!!
+        
+        example with 5 splits:
+        
+        split 1 -   |||------------
+        split 2 -   ---|||---------
+        split 3 -   ------|||------
+        split 4 -   ---------|||---
+        split 5 -   ------------|||
+        
+        returns     |||||||||||||||  <- which represents the predictions for the whole array
+        
+    '''
     kf = KFold(n_splits=n_splits)
     predictions = []
     for train_index, test_index in kf.split(X):
