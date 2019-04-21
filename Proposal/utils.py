@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
@@ -97,7 +98,7 @@ def cross_validation_average_results(model, X, y, n_splits=5):
         estimator = model(X_train, y_train)
         prediction = estimator.predict(X_test)
         predictions.extend(prediction)
-    return predictions
+    return np.array(predictions)
 
 
 def profit_share(y_true, y_pred):
