@@ -1,5 +1,6 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import SimpleImputer
 import numpy as np
 from math import sqrt
@@ -61,7 +62,14 @@ def encode_days_as_costumer(df):
     ).dt.days
     return dataframe
 
+def min_max_scale(df, columns=[]):
+    scaler = MinMaxScaler()
+    if columns == []:
+        scaler.fit(df)
+    else: 
+        scaler.fit(df[columns])
 
+    return scaler
 
 def to_dtype_object(df):
     '''
