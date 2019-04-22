@@ -7,6 +7,19 @@ import matplotlib.pyplot as plt
 
 import seaborn as sns
 
+
+def xy_plot(x, y):
+    '''
+        Simple xy plot with seaborn, needs some styling improvments
+    '''
+    sns.lineplot(x, y)
+ 
+def arg_max_plot(x, y):
+    '''
+        Highlights with a red cross the highest point in y, needs some styling improvments
+    '''
+    plt.plot(x[np.argmax(y)],np.max(y), 'rx')
+
 def univariate_outlier_id_plot(df):
     df_num = df.select_dtypes(include=["number"]).drop(["Response"], axis = 1)
     color = "gray"
