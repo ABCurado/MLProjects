@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
 from sklearn.model_selection import KFold
+import data_visualization
 
 def get_dataset():
     '''
@@ -127,5 +128,44 @@ def profit_share(y_true, y_pred):
             score += 8
         elif i == -2:
             score -= 3
+    
+    if sum(y_true) == 0:
+        return 0.00
 
     return round(score / (sum(y_true) * 8), 2)
+
+def max_threshold(y_pred, y_test, threshold_range = (0.4, 0.6), iterations = 100, visualization=False):
+    '''
+        For a given continuos predictions array with value [0,1] returns the best threshold to use when categorizint the data
+    '''
+    profits, thresholds = threshold_optimization(y_pred, y_test, threshold_range, iterations, visualization)
+    profits = np.array(profits)
+    thresholds = np.array(thresholds)
+    if visualization:
+        data_visualization.arg_max_plot(thresholds, profits)
+    return thresholds[np.argmax(profits)]
+
+def predict_with_threshold(y_pred_cont, threshold):
+    '''
+        Generates a boolean array with a given continuos array [0,1] and a defining threshold 
+    '''
+    return [1 if value > threshold else 0 for value in y_pred_cont ]
+
+def threshold_optimization(y_pred_cont, y_test, threshold_range = (0.4, 0.6), iterations = 100, visualization=False):
+    '''
+        Given a set of treshold boundaries and a iteration number it calculates the profit for each treshold
+    '''
+    step = (threshold_range[1] - threshold_range[0]) / iterations
+    thresholds = np.arange(threshold_range[0], threshold_range[1], step)
+    profits = []
+    for threshold in thresholds:
+        y_pred = predict_with_threshold(y_pred_cont, threshold)
+        
+        # Evaluation metric should be dynamic
+        profit = profit_share(y_pred, y_test)
+        profits.append(profit)
+    
+    if visualization:
+        data_visualization.xy_plot(x=thresholds, y=profits)
+    
+    return profits, thresholds
