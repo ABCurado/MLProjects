@@ -1,5 +1,11 @@
 # MLProjects
 
+# Competition Rules
+Prize: Winner gets invited to Dinner.  
+Deadline: 27th April, 24:00
+Evaluation Rules: Methods need to hold over 5 seeds.  
+                  Methods can be hijacked and improved.  
+                  One can check the notebooks of participants and double_check the score.  
 
 ## Leadership Board based on Profit Share
 
