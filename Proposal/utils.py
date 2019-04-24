@@ -28,6 +28,11 @@ def data_split(df, test_size=0.33,random_state=42):
     X = df.loc[:, df.columns != "Response"] 
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
+def simple_train_split(df, test_size=0.33, random_state=42):
+    test = df.sample(frac=test_size, random_state=random_state)
+    train = df.drop(test.index)
+    return train, test
+
 def X_y_split(df):
     '''
         Selects the outcome variable and calls sklearn trai_test_split
