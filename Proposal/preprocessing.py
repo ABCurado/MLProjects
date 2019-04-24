@@ -218,6 +218,16 @@ def morten_preprocessing_pipeline(df):
     del df["Complain"]
     return df
 
+## Joris Preprocessing Pipeline
+##  (Feel Free to use it, if you change it, please let me know)
+
+def joris_preprocessing_pipeline(df):
+    df = encode_education(df)
+    df = one_hot_encoding(df,columns = ["Marital_Status"])
+    df = encode_days_as_costumer(df)
+    df = feature_engineering.drop_useless_columns(df)
+    df = impute_income_KNN(df)
+    return df
 
 
 ## Over and Undersampling Methods
