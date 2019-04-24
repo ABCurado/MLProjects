@@ -111,7 +111,7 @@ def cross_validation_average_results(model, X, y, n_splits=5):
     for train_index, test_index in kf.split(X):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, _ = y.iloc[train_index], y.iloc[test_index]
-        estimator = model(X_train, y_train)
+        estimator = model.fit(X_train, y_train)
         prediction = estimator.predict(X_test)
         predictions.extend(prediction)
     return np.array(predictions)
