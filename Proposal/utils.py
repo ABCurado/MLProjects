@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, LeaveOneOut
 import data_visualization
 
 def get_dataset():
@@ -27,6 +27,11 @@ def data_split(df, test_size=0.33,random_state=42):
     y = df["Response"]
     X = df.loc[:, df.columns != "Response"] 
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+def simple_train_split(df, test_size=0.33, random_state=42):
+    test = df.sample(frac=test_size, random_state=random_state)
+    train = df.drop(test.index)
+    return train, test
 
 def X_y_split(df):
     '''
@@ -90,7 +95,7 @@ def calculate_confusion_matrix(y_true, y_pred):
     '''
     return confusion_matrix(y_true, y_pred)
 
-def cross_validation_average_results(model, X, y, n_splits=5):
+def cross_validation_average_results(model, X, y, n_splits=5, scaler=None, **model_kwargs):
     '''
         Does cross validation with n_splits and returns an array with y size as predictions.
         !!!!Currently not working with transformations calculated on train data and applied in test data!!!
@@ -106,16 +111,48 @@ def cross_validation_average_results(model, X, y, n_splits=5):
         returns     |||||||||||||||  <- which represents the predictions for the whole array
         
     '''
-    kf = KFold(n_splits=n_splits)
+    kf = KFold(n_splits=n_splits, shuffle=False)
     predictions = []
     for train_index, test_index in kf.split(X):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, _ = y.iloc[train_index], y.iloc[test_index]
+        if scaler is not None:
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
         estimator = model.fit(X_train, y_train)
         prediction = estimator.predict(X_test)
         predictions.extend(prediction)
     return np.array(predictions)
 
+def leave_one_out_cross_validation_average_results(model, X, y, n_splits=5, scaler=None, **model_kwargs):
+    '''
+        Does cross validation with n_splits and returns an array with y size as predictions.
+        !!!!Currently not working with transformations calculated on train data and applied in test data!!!
+        
+        example with 5 splits:
+        
+        split 1 -   |--------------
+        split 2 -   -|-------------
+        split 3 -   --|------------
+                  ...
+        split n-1 - -------------|-
+        split n -   --------------|
+        
+        returns     |||||||||||||||  <- which represents the predictions for the whole array
+        
+    '''
+    kf = LeaveOneOut()
+    predictions = []
+    for train_index, test_index in kf.split(X):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, _ = y.iloc[train_index], y.iloc[test_index]
+        if scaler is not None:
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
+        estimator = model.fit(X_train, y_train)
+        prediction = estimator.predict(X_test)
+        predictions.extend(prediction)
+    return np.array(predictions)
 
 def profit_share(y_true, y_pred):
     """
