@@ -10,6 +10,7 @@ Evaluation Rules: Methods need to hold over 5 seeds.
 ## Leadership Board based on Profit Share
 
 0.62 | Antonio| Neural net
+0.62 | Joris  | Neural net, undersampling, optimizer="adam", loss="mean_sq_error"
 0.52 | Morten | XGBoost
 0.41 | Morten | DecisionTree
 0.05 | Antonio| KNN
