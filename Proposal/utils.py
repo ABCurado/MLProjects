@@ -206,3 +206,30 @@ def threshold_optimization(y_pred_cont, y_test, threshold_range = (0.4, 0.6), it
         data_visualization.xy_plot(x=thresholds, y=profits)
     
     return profits, thresholds
+
+def shuffle_weights(model, weights=None):
+    """Randomly permute the weights in `model`, or the given `weights`.
+    This is a fast approximation of re-initializing the weights of a model.
+    Assumes weights are distributed independently of the dimensions of the weight tensors
+      (i.e., the weights have the same distribution along each dimension).
+    :param Model model: Modify the weights of the given model.
+    :param list(ndarray) weights: The model's weights will be replaced by a random permutation of these weights.
+      If `None`, permute the model's current weights.
+    """
+    if weights is None:
+        weights = model.get_weights()
+    weights = [np.random.permutation(w.flat).reshape(w.shape) for w in weights]
+    # Faster, but less random: only permutes along the first dimension
+    # weights = [np.random.permutation(w) for w in weights]
+    model.set_weights(weights)
+    
+def NN_evaluation(model, X_test, y_test):
+    y_predicted = model.predict(X_test)
+    threshold = max_threshold(y_predicted, y_test, threshold_range = (0.1, 0.99),iterations=10000, visualization=True)
+    y_pred = predict_with_threshold(y_predicted,threshold)
+
+    print("Accuracy {:1.2f}".format(calculate_accuracy(y_pred, y_test)))
+    print("Area under the curve {:1.2f}".format(calculate_auc(y_pred, y_test)))
+    print("Precision {:1.2f}".format(calculate_precision_score(y_pred, y_test)))
+    print("Recall {:1.2f}".format(calculate_recall_score(y_pred, y_test)))
+    print("Profit Share {:1.2f}".format(profit_share(y_pred, y_test)))
