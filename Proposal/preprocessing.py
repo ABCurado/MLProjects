@@ -71,6 +71,13 @@ def min_max_scale(df, columns=[]):
 
     return scaler
 
+def Min_Max_Train(X_train, X_test):    
+    scaler = MinMaxScaler()
+    # Only fit the training data
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    return X_train, X_test
+
 def to_dtype_object(df):
     '''
         Changes columns with 0 or 1 values to an object

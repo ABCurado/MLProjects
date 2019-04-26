@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, LeaveOneOut
 import data_visualization
 
 def get_dataset():
@@ -27,6 +27,11 @@ def data_split(df, test_size=0.33,random_state=42):
     y = df["Response"]
     X = df.loc[:, df.columns != "Response"] 
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+def simple_train_split(df, test_size=0.33, random_state=42):
+    test = df.sample(frac=test_size, random_state=random_state)
+    train = df.drop(test.index)
+    return train, test
 
 def X_y_split(df):
     '''
@@ -90,7 +95,7 @@ def calculate_confusion_matrix(y_true, y_pred):
     '''
     return confusion_matrix(y_true, y_pred)
 
-def cross_validation_average_results(model, X, y, n_splits=5):
+def cross_validation_average_results(model, X, y, n_splits=5, scaler=None, **model_kwargs):
     '''
         Does cross validation with n_splits and returns an array with y size as predictions.
         !!!!Currently not working with transformations calculated on train data and applied in test data!!!
@@ -106,16 +111,48 @@ def cross_validation_average_results(model, X, y, n_splits=5):
         returns     |||||||||||||||  <- which represents the predictions for the whole array
         
     '''
-    kf = KFold(n_splits=n_splits)
+    kf = KFold(n_splits=n_splits, shuffle=False)
     predictions = []
     for train_index, test_index in kf.split(X):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, _ = y.iloc[train_index], y.iloc[test_index]
-        estimator = model(X_train, y_train)
+        if scaler is not None:
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
+        estimator = model.fit(X_train, y_train)
         prediction = estimator.predict(X_test)
         predictions.extend(prediction)
     return np.array(predictions)
 
+def leave_one_out_cross_validation_average_results(model, X, y, n_splits=5, scaler=None, **model_kwargs):
+    '''
+        Does cross validation with n_splits and returns an array with y size as predictions.
+        !!!!Currently not working with transformations calculated on train data and applied in test data!!!
+        
+        example with 5 splits:
+        
+        split 1 -   |--------------
+        split 2 -   -|-------------
+        split 3 -   --|------------
+                  ...
+        split n-1 - -------------|-
+        split n -   --------------|
+        
+        returns     |||||||||||||||  <- which represents the predictions for the whole array
+        
+    '''
+    kf = LeaveOneOut()
+    predictions = []
+    for train_index, test_index in kf.split(X):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, _ = y.iloc[train_index], y.iloc[test_index]
+        if scaler is not None:
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
+        estimator = model.fit(X_train, y_train)
+        prediction = estimator.predict(X_test)
+        predictions.extend(prediction)
+    return np.array(predictions)
 
 def profit_share(y_true, y_pred):
     """
@@ -132,7 +169,7 @@ def profit_share(y_true, y_pred):
     if sum(y_true) == 0:
         return 0.00
 
-    return round(score / (sum(y_true) * 8), 2)
+    return round(score / (sum(y_true) * 8), 3)
 
 def max_threshold(y_pred, y_test, threshold_range = (0.4, 0.6), iterations = 100, visualization=False):
     '''
@@ -169,3 +206,44 @@ def threshold_optimization(y_pred_cont, y_test, threshold_range = (0.4, 0.6), it
         data_visualization.xy_plot(x=thresholds, y=profits)
     
     return profits, thresholds
+
+def shuffle_weights(model, weights=None):
+    """Randomly permute the weights in `model`, or the given `weights`.
+    This is a fast approximation of re-initializing the weights of a model.
+    Assumes weights are distributed independently of the dimensions of the weight tensors
+      (i.e., the weights have the same distribution along each dimension).
+    :param Model model: Modify the weights of the given model.
+    :param list(ndarray) weights: The model's weights will be replaced by a random permutation of these weights.
+      If `None`, permute the model's current weights.
+    """
+    if weights is None:
+        weights = model.get_weights()
+    weights = [np.random.permutation(w.flat).reshape(w.shape) for w in weights]
+    # Faster, but less random: only permutes along the first dimension
+    # weights = [np.random.permutation(w) for w in weights]
+    model.set_weights(weights)
+    
+def NN_evaluation(model, X_test, y_test):
+    y_predicted = model.predict(X_test)
+    threshold = max_threshold(y_predicted, y_test, threshold_range = (0.1, 0.99),iterations=10000, visualization=False)
+    y_pred = predict_with_threshold(y_predicted,threshold)
+
+    print("Accuracy {:1.2f}".format(calculate_accuracy(y_pred, y_test)))
+    print("Area under the curve {:1.2f}".format(calculate_auc(y_pred, y_test)))
+    print("Precision {:1.2f}".format(calculate_precision_score(y_pred, y_test)))
+    print("Recall {:1.2f}".format(calculate_recall_score(y_pred, y_test)))
+    print("Profit Share {:1.2f}".format(profit_share(y_pred, y_test)))
+    return calculate_accuracy(y_pred, y_test), calculate_auc(y_pred, y_test), calculate_precision_score(y_pred, y_test), calculate_recall_score(y_pred, y_test), profit_share(y_pred, y_test)
+
+def Cross_Val_Models(models_dict, X, y, n_splits=5, scaler=scaler):
+    """
+    Pass the dictionary of all the model you want to do the cross validation for. 
+    For Example:  {"GaussianNB" : GaussianNB(), "MultinomialNB" : MultinomialNB()}
+    """
+    results = {}
+    for model in models.keys():
+        y_predicted = utils.cross_validation_average_results(models[model], X, y, n_splits,scaler)
+        threshold = utils.max_threshold(y_predicted, y, threshold_range = (0.1, 0.99),iterations=1000, visualization=True)
+        y_pred = utils.predict_with_threshold(y_predicted,threshold)
+        results[model] = utils.profit_share(y_predicted, y)
+    return results
