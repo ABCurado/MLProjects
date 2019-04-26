@@ -234,3 +234,16 @@ def NN_evaluation(model, X_test, y_test):
     print("Recall {:1.2f}".format(calculate_recall_score(y_pred, y_test)))
     print("Profit Share {:1.2f}".format(profit_share(y_pred, y_test)))
     return calculate_accuracy(y_pred, y_test), calculate_auc(y_pred, y_test), calculate_precision_score(y_pred, y_test), calculate_recall_score(y_pred, y_test), profit_share(y_pred, y_test)
+
+def Cross_Val_Models(models_dict, X, y, n_splits=5, scaler=scaler):
+    """
+    Pass the dictionary of all the model you want to do the cross validation for. 
+    For Example:  {"GaussianNB" : GaussianNB(), "MultinomialNB" : MultinomialNB()}
+    """
+    results = {}
+    for model in models.keys():
+        y_predicted = utils.cross_validation_average_results(models[model], X, y, n_splits,scaler)
+        threshold = utils.max_threshold(y_predicted, y, threshold_range = (0.1, 0.99),iterations=1000, visualization=True)
+        y_pred = utils.predict_with_threshold(y_predicted,threshold)
+        results[model] = utils.profit_share(y_predicted, y)
+    return results
