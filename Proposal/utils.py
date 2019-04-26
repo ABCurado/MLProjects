@@ -169,7 +169,7 @@ def profit_share(y_true, y_pred):
     if sum(y_true) == 0:
         return 0.00
 
-    return round(score / (sum(y_true) * 8), 2)
+    return round(score / (sum(y_true) * 8), 3)
 
 def max_threshold(y_pred, y_test, threshold_range = (0.4, 0.6), iterations = 100, visualization=False):
     '''
