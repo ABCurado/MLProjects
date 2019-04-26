@@ -225,7 +225,7 @@ def shuffle_weights(model, weights=None):
     
 def NN_evaluation(model, X_test, y_test):
     y_predicted = model.predict(X_test)
-    threshold = max_threshold(y_predicted, y_test, threshold_range = (0.1, 0.99),iterations=10000, visualization=True)
+    threshold = max_threshold(y_predicted, y_test, threshold_range = (0.1, 0.99),iterations=10000, visualization=False)
     y_pred = predict_with_threshold(y_predicted,threshold)
 
     print("Accuracy {:1.2f}".format(calculate_accuracy(y_pred, y_test)))
@@ -233,3 +233,4 @@ def NN_evaluation(model, X_test, y_test):
     print("Precision {:1.2f}".format(calculate_precision_score(y_pred, y_test)))
     print("Recall {:1.2f}".format(calculate_recall_score(y_pred, y_test)))
     print("Profit Share {:1.2f}".format(profit_share(y_pred, y_test)))
+    return calculate_accuracy(y_pred, y_test), calculate_auc(y_pred, y_test), calculate_precision_score(y_pred, y_test), calculate_recall_score(y_pred, y_test), profit_share(y_pred, y_test)

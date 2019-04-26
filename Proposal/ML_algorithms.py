@@ -21,11 +21,11 @@ def KNN(X_train, y_train):
     tree.fit(X_train, y_train)
     return tree
 
-def KerasNN(X_train, X_test, y_train, y_test, input_dim=32, n_layers=4, optimizer="rmsprop", loss="binary_crossentropy", init="uniform", metrics=["accuracy"]):
+def KerasNN(X_train, X_test, y_train, y_test, input_dim=32, n_layers=4, optimizer="rmsprop", loss="binary_crossentropy", init="uniform", metrics=["accuracy"], random_state=42):
     """
     Keras Neural Network, define the amount of layers you want, which optimizer you want to use and which loss function you want to apply.
     """ 
-    np.random.seed(42)
+    np.random.seed(random_state)
 
     model = models.Sequential()
     model.add(layers.Dense(6, activation="relu", input_dim=input_dim))
