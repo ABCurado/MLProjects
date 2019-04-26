@@ -95,7 +95,7 @@ def calculate_confusion_matrix(y_true, y_pred):
     '''
     return confusion_matrix(y_true, y_pred)
 
-def cross_validation_average_results(model, X, y, n_splits=5, scaler=None, **model_kwargs):
+def cross_validation_average_results(model, X, y, n_splits=5, scaler=None, sampling_technique=None, **model_kwargs):
     '''
         Does cross validation with n_splits and returns an array with y size as predictions.
         !!!!Currently not working with transformations calculated on train data and applied in test data!!!
@@ -116,15 +116,20 @@ def cross_validation_average_results(model, X, y, n_splits=5, scaler=None, **mod
     for train_index, test_index in kf.split(X):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, _ = y.iloc[train_index], y.iloc[test_index]
+        
         if scaler is not None:
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.transform(X_test)
+            
+        if sampling_technique is not None:
+            X_train, y_train = sampling_technique.fit_resample(X_train, y_train)
+        
         estimator = model.fit(X_train, y_train)
         prediction = estimator.predict(X_test)
         predictions.extend(prediction)
     return np.array(predictions)
 
-def leave_one_out_cross_validation_average_results(model, X, y, n_splits=5, scaler=None, **model_kwargs):
+def leave_one_out_cross_validation_average_results(model, X, y, n_splits=5, scaler=None, sampling_technique=None,**model_kwargs):
     '''
         Does cross validation with n_splits and returns an array with y size as predictions.
         !!!!Currently not working with transformations calculated on train data and applied in test data!!!
@@ -146,9 +151,13 @@ def leave_one_out_cross_validation_average_results(model, X, y, n_splits=5, scal
     for train_index, test_index in kf.split(X):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, _ = y.iloc[train_index], y.iloc[test_index]
+        
         if scaler is not None:
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.transform(X_test)
+        if sampling_technique is not None:
+            X_train, y_train = sampling_technique.fit_resample(X_train, y_train)
+            
         estimator = model.fit(X_train, y_train)
         prediction = estimator.predict(X_test)
         predictions.extend(prediction)
