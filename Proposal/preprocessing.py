@@ -7,6 +7,8 @@ from math import sqrt
 import feature_engineering
 from imblearn.over_sampling import SMOTE, ADASYN
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import KBinsDiscretizer
+from scipy import stats
 
 def convert_to_boolean(df):
     '''
@@ -229,11 +231,40 @@ def morten_preprocessing_pipeline(df):
 ##  (Feel Free to use it, if you change it, please let me know)
 
 def joris_preprocessing_pipeline(df):
-    df = encode_education(df)
+    df = impute_income_KNN(df)
+    df = feature_engineering.partner_binary(df)
+    df = feature_engineering.income_housemember(df)
+    df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
     df = one_hot_encoding(df,columns = ["Marital_Status"])
+    df = one_hot_encoding(df,columns = ["Education"])
     df = encode_days_as_costumer(df)
     df = feature_engineering.drop_useless_columns(df)
+    df = replace_income(df)
+    df = feature_engineering.responsiveness_share(df)
+    df = feature_engineering.ave_purchase(df)
+    df = feature_engineering.income_share(df)
+    return df
+
+def bin_it_preprocessing_pipeline(df):
     df = impute_income_KNN(df)
+    df = feature_engineering.partner_binary(df)
+    df = feature_engineering.income_housemember(df)
+    df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
+    df = one_hot_encoding(df,columns = ["Marital_Status"])
+    df = one_hot_encoding(df,columns = ["Education"])
+    df = encode_days_as_costumer(df)
+    df = feature_engineering.drop_useless_columns(df)
+    df = replace_income(df)
+    df = feature_engineering.responsiveness_share(df)
+    df = feature_engineering.ave_purchase(df)
+    df = feature_engineering.income_share(df)
+    df = preprocessing.Binning_Features(df, "Income", n_bins=5)
+    df = preprocessing.Binning_Features(df, "MntWines", n_bins=5)
+    df = preprocessing.Binning_Features(df, "MntFruits", n_bins=5)
+    df = preprocessing.Binning_Features(df, "MntMeatProducts", n_bins=5)
+    df = preprocessing.Binning_Features(df, "MntFishProducts", n_bins=5)
+    df = preprocessing.Binning_Features(df, "MntSweetProducts", n_bins=5)
+    df = preprocessing.Binning_Features(df, "MntGoldProds", n_bins=5)
     return df
 
 
@@ -303,3 +334,15 @@ def ADASYN_oversampling(X, y):
     sm = ADASYN()
     X, y = sm.fit_sample(X, y)
     return (X, y)
+
+def Binning_Features(df, feature="Income", n_bins=10, strategy="quantile", cont_tab=False):
+    target = "Response"
+
+    bindisc = KBinsDiscretizer(n_bins=n_bins, encode='ordinal', strategy=strategy)
+    mnt_bin = bindisc.fit_transform(df[feature].values[:, np.newaxis])
+    mnt_bin = pd.Series(mnt_bin[:, 0], index=df.index)
+    if cont_tab == True:
+        obs_cont_tab = pd.crosstab(mnt_bin, df[target])
+        print(obs_cont_tab) 
+    df[feature] = mnt_bin
+    return df
