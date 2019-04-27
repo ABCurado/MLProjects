@@ -315,7 +315,29 @@ def pca_pipeline(df):
 
 
 def box_cox_pipeline(df):
+        # delete unwanted columns
+    df = feature_engineering.drop_useless_columns(df)
+    df = encode_education(df)
+    df = one_hot_encoding(df, columns=["Marital_Status"])
+    df = impute_income_KNN(df)
 
+    bx_cx_trans_dict = { "log": np.log, "sqrt": np.sqrt,
+                  "exp": np.exp, "**1/4": lambda x: np.power(x, 0.25),
+                  "**2": lambda x: np.power(x, 2), "**4": lambda x: np.power(x, 4)}
+
+    # treatment weird values
+    columns = ["Year_Birth", "Income", "Kidhome","Teenhome",'MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts',
+       'MntSweetProducts', 'MntGoldProds', 'NumDealsPurchases',
+       'NumWebPurchases', 'NumCatalogPurchases', 'NumStorePurchases',
+       'NumWebVisitsMonth', 'Recency']
+    # 3) perform power transformations on scaled features and select the best
+    for feature in columns:
+        for trans_key, trans_value in bx_cx_trans_dict.items():
+            # 3) 1) 1) apply transformation on training data
+            feature_trans = np.round(trans_value(df[feature]), 4)
+            if trans_key == "log":
+                feature_trans.loc[np.isfinite(feature_trans) == False] = -5
+            df[str(feature)+str(trans_key)] = feature_trans
     return df
 
 
