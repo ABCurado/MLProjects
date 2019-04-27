@@ -263,13 +263,13 @@ def bin_it_preprocessing_pipeline(df):
     df = feature_engineering.responsiveness_share(df)
     df = feature_engineering.ave_purchase(df)
     df = feature_engineering.income_share(df)
-    df = preprocessing.Binning_Features(df, "Income", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntWines", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntFruits", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntMeatProducts", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntFishProducts", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntSweetProducts", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntGoldProds", n_bins=5)
+    df = Binning_Features(df, "Income", n_bins=5)
+    df = Binning_Features(df, "MntWines", n_bins=5)
+    df = Binning_Features(df, "MntFruits", n_bins=5)
+    df = Binning_Features(df, "MntMeatProducts", n_bins=5)
+    df = Binning_Features(df, "MntFishProducts", n_bins=5)
+    df = Binning_Features(df, "MntSweetProducts", n_bins=5)
+    df = Binning_Features(df, "MntGoldProds", n_bins=5)
     return df
 
 def simple_pipeline(df):
@@ -277,6 +277,7 @@ def simple_pipeline(df):
     df = feature_engineering.drop_useless_columns(df)
     # treatment weird values
     df = marital_others(df)
+    df = encode_days_as_costumer(df)
     # check for nan
     df = df.dropna()
     # look at extreme values
@@ -293,7 +294,7 @@ def chop_off(df):
 
     # check for nan
     df = df.dropna()
-
+    df = encode_days_as_costumer(df)
     # treatment weird values
     df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
     df = outlier_IQR(df, columns=["Year_Birth", "Income", 'MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts',
@@ -315,10 +316,21 @@ def pca_pipeline(df):
 
 
 def box_cox_pipeline(df):
-
+    
     return df
 
+def small_pipeline(df):
+    df = impute_income_KNN(df)
+    df = df.drop(["Kidhome","Teenhome"], axis=1)
+    df = feature_engineering.drop_useless_columns(df)
+    df = encode_days_as_costumer(df)
 
+    df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
+    df = one_hot_encoding(df,columns = ["Marital_Status"])
+    df = one_hot_encoding(df,columns = ["Education"])
+    
+    return df
+                             
 def feature_engineered(df):
     # use only feature engineered stuff
     df = feature_engineering.drop_useless_columns(df)
