@@ -13,6 +13,9 @@ from sklearn.model_selection import train_test_split
 import utils
 import preprocessing
 import data_visualization
+from xgboost import XGBClassifier
+
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 import feature_engineering
 from ML_algorithms import *
@@ -36,20 +39,49 @@ with open(file_name, "a") as myfile:
 
 
 models = [
-    ("MLPClassifier_10_layers", MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42))
-
+    ("MLPClassifier_10_layers", MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42)),
+    ("MLPClassifier_5_layers", MLPClassifier(hidden_layer_sizes=(5), solver="lbfgs", max_iter=1000, random_state=42)),
+    ("KerasNN_not_fitted", KerasNN_not_fitted()),
+    ("GaussianNB", GaussianNB()),
+    ("MultinomialNB", MultinomialNB()),
+    ("ComplementNB", ComplementNB()),
+    ("SVC", SVC()),
+    ("LinearSVC", LinearSVC()),
+    ("LogisticRegression", LogisticRegression()),
+    ("SGDClassifier", SGDClassifier()),
+    ("KNeighborsClassifier", KNeighborsClassifier()),
+    ("DecisionTreeClassifier", DecisionTreeClassifier(criterion="gini", class_weight=None)),
+    ("XGBClassifier", XGBClassifier(colsample_by_tree=0.1,
+                                   learning_rate=0.89,
+                                   max_depth=8,
+                                   n_estimators=10000,
+                                   eval_metric="auc",
+                                   n_jobs=-1, silent=0, verbose=0)),
+    ("MLPClassifier", MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42)),
+    ("LinearRegression", LinearRegression()),
+    ("KerasNN_3layers" : KerasNN_not_fitted(n_layers=3, init="he_normal")),
+    ("KerasNN_6layers" : KerasNN_not_fitted(n_neurons=6, init="he_normal")),
+    ("KerasNN_9layers" : KerasNN_not_fitted(n_neurons=9, init="he_normal")),
+    ("KerasNN_12layers" : KerasNN_not_fitted(n_neurons=12,init="he_normal"))
+}
 ]
 
 scalers = [
-    ("MinMaxScaler", MinMaxScaler())
+    ("StandardScaler", StandardScaler()),
+    ("RobustScaler", RobustScaler()),
+    ("MinMaxScaler", MinMaxScaler()),
+    ("None", None)
 ]
 
 samplers =  [
-    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5))
+    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
+    ("None", None)
 ]
 
 pre_processing_pipelines = [
-    ("Joris_Pipeline", preprocessing.joris_preprocessing_pipeline)
+    ("Joris_Pipeline", preprocessing.joris_preprocessing_pipeline),
+    ("Morten_Pipeline", preprocessing.morten_preprocessing_pipeline)
+
 ]
 seed = [1]
 
