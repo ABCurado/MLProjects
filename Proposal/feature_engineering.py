@@ -8,7 +8,6 @@ def remove_non_numerical(df):
 def drop_useless_columns(df):
     '''Remove non-numerical columns'''
     dataframe = df.copy()
-    del dataframe['ID']
     del dataframe['Z_Revenue']
     del dataframe['Z_CostContact']
     return dataframe
