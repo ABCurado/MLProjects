@@ -14,7 +14,8 @@ import utils
 import preprocessing
 import data_visualization
 from xgboost import XGBClassifier
-
+import warnings
+warnings.filterwarnings("ignore")
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 import feature_engineering
@@ -24,17 +25,16 @@ from seaborn import countplot
 import numpy as np
 from imblearn.over_sampling import RandomOverSampler
 
-import warnings
-warnings.filterwarnings("ignore")
 
 import sys
 import os
 from subprocess import call
 
-file_name= "LogFiles/" + "results_antonio_log.csv"
+file_name= "LogFiles/" + "results_"+ str(datetime.datetime.now().hour) + \
+            "_" + str(datetime.datetime.now().minute) +"_log.csv"
 
 header_string = "Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,result_profit"
-with open(file_name, "a") as myfile:
+with open(file_name, "w") as myfile:
     myfile.write(header_string + "\n")
 
 
@@ -56,14 +56,13 @@ models = [
                                    max_depth=8,
                                    n_estimators=10000,
                                    eval_metric="auc",
-                                   n_jobs=-1, silent=0, verbose=0)),
+                                   n_jobs=1, silent=0, verbose=0)),
     ("MLPClassifier", MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42)),
     ("LinearRegression", LinearRegression()),
-    ("KerasNN_3layers" : KerasNN_not_fitted(n_layers=3, init="he_normal")),
-    ("KerasNN_6layers" : KerasNN_not_fitted(n_neurons=6, init="he_normal")),
-    ("KerasNN_9layers" : KerasNN_not_fitted(n_neurons=9, init="he_normal")),
-    ("KerasNN_12layers" : KerasNN_not_fitted(n_neurons=12,init="he_normal"))
-}
+    ("KerasNN_3layers" , KerasNN_not_fitted(n_layers=3, init="he_normal")),
+    ("KerasNN_6layers" , KerasNN_not_fitted(n_neurons=6, init="he_normal")),
+    ("KerasNN_9layers" , KerasNN_not_fitted(n_neurons=9, init="he_normal")),
+    ("KerasNN_12layers" , KerasNN_not_fitted(n_neurons=12,init="he_normal"))
 ]
 
 scalers = [
@@ -80,7 +79,8 @@ samplers =  [
 
 pre_processing_pipelines = [
     ("Joris_Pipeline", preprocessing.joris_preprocessing_pipeline),
-    ("Morten_Pipeline", preprocessing.morten_preprocessing_pipeline)
+    ("Morten_Pipeline", preprocessing.morten_preprocessing_pipeline),
+    ("Bin it!", preprocessing.bin_it_preprocessing_pipeline)
 
 ]
 seed = [1]
