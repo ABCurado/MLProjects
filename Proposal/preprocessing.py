@@ -8,6 +8,7 @@ import feature_engineering
 from imblearn.over_sampling import SMOTE, ADASYN
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import KBinsDiscretizer
+from sklearn.decomposition import PCA
 from scipy import stats
 
 def convert_to_boolean(df):
@@ -309,9 +310,22 @@ def chop_off(df):
 
     return df
 
-def pca_pipeline(df):
+def pca_chopoff(df):
     # do fancy pca stuff here
-     return df
+    continous = ['Income', 'MntWines', 'MntFruits',
+       'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts',
+       'MntGoldProds', 'NumDealsPurchases', 'NumWebPurchases',
+       'NumCatalogPurchases', 'NumStorePurchases', 'NumWebVisitsMonth']
+    target = df["Response"]
+    df = df[continous]
+    df = df.dropna()
+    scaler = min_max_scale(df,continous)
+    df = scaler.transform(df)
+    pca = PCA(n_components=4)
+    df = pca.fit_transform(df)
+    df = pd.DataFrame(df)
+    df["Response"] = target
+    return df
 
 
 def box_cox_pipeline(df):
@@ -362,7 +376,7 @@ def feature_engineered(df):
        'AcceptedCmp4', 'AcceptedCmp5', 'AcceptedCmp1', 'AcceptedCmp2',
        'Complain'], axis=1)
     df = outlier_IQR(df, columns=['income_housemember', 'income_share', 'ave_purchase'])
-    
+
     return df
 
 
