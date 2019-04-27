@@ -7,6 +7,8 @@ from math import sqrt
 import feature_engineering
 from imblearn.over_sampling import SMOTE, ADASYN
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import KBinsDiscretizer
+from scipy import stats
 
 def convert_to_boolean(df):
     '''
@@ -310,3 +312,15 @@ def ADASYN_oversampling(X, y):
     sm = ADASYN()
     X, y = sm.fit_sample(X, y)
     return (X, y)
+
+def Binning_Features(df, feature="Income", n_bins=10, strategy="quantile", cont_tab=False):
+    target = "Response"
+
+    bindisc = KBinsDiscretizer(n_bins=n_bins, encode='ordinal', strategy=strategy)
+    mnt_bin = bindisc.fit_transform(df[feature].values[:, np.newaxis])
+    mnt_bin = pd.Series(mnt_bin[:, 0], index=df.index)
+    if cont_tab == True:
+        obs_cont_tab = pd.crosstab(mnt_bin, df[target])
+        print(obs_cont_tab) 
+    df[feature] = mnt_bin
+    return df
