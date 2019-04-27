@@ -37,7 +37,7 @@ def responsiveness_share(df):
 
 def ave_purchase(df):
     df["ave_purchase"] = df[['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts', 'MntGoldProds']].sum(axis=1) / df["Dt_Customer"]
-    df.loc[df["ave_purchase"]== inf ]
+    df.loc[df["ave_purchase"]== np.inf, "ave_purchase"] = df[['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts', 'MntGoldProds']].sum(axis=1)
     return df
 
 def income_share(df):
