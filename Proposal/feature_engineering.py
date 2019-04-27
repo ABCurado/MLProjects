@@ -41,9 +41,29 @@ def ave_purchase(df):
     return df
 
 def income_share(df):
-    df["income_share"] = df[['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts',                             'MntGoldProds']].sum(axis=1) / df["Income"]
+    df["income_share"] = df[['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts', 'MntGoldProds']].sum(axis=1) / df["Income"]
     return df
 
 def income_housemember(df):
-    df["income_housemember"] = (df[['Kidhome', 'Teenhome']].sum(axis=1) +1) / df["Income"]
+    df["income_housemember"] = df["Income"] / (df[['Kidhome', 'Teenhome']].sum(axis=1) +1)
+    return df
+
+def kids_home(df):
+    df["kids_home"] = df[['Kidhome', 'Teenhome']].sum(axis=1)
+    return df
+
+def veggie(df):
+    df["veggie"] = df["MntMeatProducts"].apply(lambda x: 1 if x==0 else 0)
+    return df
+
+def alcoholic(df):
+    df["alcoholic"] = df["MntWines"].apply(lambda x: 1 if x>1200 else 0)
+    return df
+
+def phd(df):
+    df["phd"] = df["Education"].apply(lambda x: 1 if x=="PhD" else 0)
+    return df
+
+def tutti_frutti(df):
+    df["tutti_frutti"] = df["MntFruits"].apply(lambda x: 1 if x > 50 else 0)
     return df

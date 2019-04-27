@@ -169,6 +169,11 @@ def anomalies_treatment(df, column, anomalies):
     """
     return df.loc[~df[column].isin(anomalies), :]
 
+def marital_others(df):
+    df.loc[df["Marital_Status"] == "YOLO", "Marital_Status"] = "Others"
+    df.loc[df["Marital_Status"] == "Absurd", "Marital_Status"] = "Others"
+    return df
+
 def outlier_IQR(df, columns=["Year_Birth","Income"]):
     """
     outlier deletetion using the IQR, you can choose the variables you want to delete the outliers for by selecting the columns. The default is Year_Birth & Income. Also you can change the quantile values.
@@ -265,6 +270,77 @@ def bin_it_preprocessing_pipeline(df):
     df = preprocessing.Binning_Features(df, "MntFishProducts", n_bins=5)
     df = preprocessing.Binning_Features(df, "MntSweetProducts", n_bins=5)
     df = preprocessing.Binning_Features(df, "MntGoldProds", n_bins=5)
+    return df
+
+def simple_pipeline(df):
+    # delete unwanted columns
+    df = feature_engineering.drop_useless_columns(df)
+    # treatment weird values
+    df = marital_others(df)
+    # check for nan
+    df = df.dropna()
+    # look at extreme values
+    df = one_hot_encoding(df, columns=["Marital_Status"])
+    df = one_hot_encoding(df, columns=["Education"])
+    # feature engineering
+
+    return df
+
+
+def chop_off(df):
+    # delete unwanted columns
+    df = feature_engineering.drop_useless_columns(df)
+
+    # check for nan
+    df = df.dropna()
+
+    # treatment weird values
+    df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
+    df = outlier_IQR(df, columns=["Year_Birth", "Income", 'MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts',
+       'MntSweetProducts', 'MntGoldProds', 'NumDealsPurchases',
+       'NumWebPurchases', 'NumCatalogPurchases', 'NumStorePurchases',
+       'NumWebVisitsMonth', 'Recency'])
+
+    #encoding
+    df = one_hot_encoding(df, columns=["Marital_Status"])
+    df = one_hot_encoding(df, columns=["Education"])
+
+    # cutoff based on chi-squared test
+
+    return df
+
+def pca_pipeline(df):
+    # do fancy pca stuff here
+     return df
+
+
+def box_cox_pipeline(df):
+
+    return df
+
+
+def feature_engineered(df):
+    # use only feature engineered stuff
+    df = feature_engineering.drop_useless_columns(df)
+    df = encode_days_as_costumer(df)
+    df = feature_engineering.partner_binary(df)
+    df = feature_engineering.responsiveness_share(df)
+    df = feature_engineering.alcoholic(df)
+    df = feature_engineering.income_housemember(df)
+    df = feature_engineering.kids_home(df)
+    df = feature_engineering.income_share(df)
+    df = feature_engineering.veggie(df)
+    df = feature_engineering.phd(df)
+    df = feature_engineering.ave_purchase(df)
+    df =feature_engineering.tutti_frutti(df)
+    df = df.drop(columns=["Year_Birth", "Income", 'MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts',
+                                  'MntSweetProducts', 'MntGoldProds', 'NumDealsPurchases',
+                                  'NumWebPurchases', 'NumCatalogPurchases', 'NumStorePurchases',
+                                  'NumWebVisitsMonth', 'Dt_Customer', 'Recency', 'Education', 'Marital_Status', 'Kidhome', 'Teenhome', 'AcceptedCmp3',
+       'AcceptedCmp4', 'AcceptedCmp5', 'AcceptedCmp1', 'AcceptedCmp2',
+       'Complain'], axis=1)
+    df = outlier_IQR(df, columns=['income_housemember', 'income_share', 'ave_purchase'])
+    
     return df
 
 
