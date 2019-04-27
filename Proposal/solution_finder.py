@@ -108,9 +108,10 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
     threshold = utils.max_threshold(y_predicted, y, threshold_range=(0.2, 0.6), iterations=1000, visualization=False)
     y_pred = utils.predict_with_threshold(y_predicted, threshold)
     result = utils.profit_share(y_pred, y)
-    precision = utils.calculate_pecision_score(y_pred, y)
+    precision = utils.calculate_precision_score(y_pred, y)
     recall = utils.calculate_recall_score(y_pred, y)
     time_elapsed = datetime.datetime.now() - start_time
+
     # Create result string
     result_string = ",".join(
         [model[0],
