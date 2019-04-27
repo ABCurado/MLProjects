@@ -258,13 +258,13 @@ def bin_it_preprocessing_pipeline(df):
     df = feature_engineering.responsiveness_share(df)
     df = feature_engineering.ave_purchase(df)
     df = feature_engineering.income_share(df)
-    df = preprocessing.Binning_Features(df, "Income", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntWines", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntFruits", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntMeatProducts", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntFishProducts", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntSweetProducts", n_bins=5)
-    df = preprocessing.Binning_Features(df, "MntGoldProds", n_bins=5)
+    df = Binning_Features(df, "Income", n_bins=5)
+    df = Binning_Features(df, "MntWines", n_bins=5)
+    df = Binning_Features(df, "MntFruits", n_bins=5)
+    df = Binning_Features(df, "MntMeatProducts", n_bins=5)
+    df = Binning_Features(df, "MntFishProducts", n_bins=5)
+    df = Binning_Features(df, "MntSweetProducts", n_bins=5)
+    df = Binning_Features(df, "MntGoldProds", n_bins=5)
     return df
 
 
