@@ -34,3 +34,16 @@ def responsiveness_share(df):
     """
     df["Responsiveness"] = df[["AcceptedCmp1", "AcceptedCmp2", "AcceptedCmp3", "AcceptedCmp4", "AcceptedCmp5"]].sum(axis=1) / 5
     return df
+
+def ave_purchase(df):
+    df["ave_purchase"] = df[['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts', 'MntGoldProds']].sum(axis=1) / df["Dt_Customer"]
+    df.loc[df["ave_purchase"]== inf ]
+    return df
+
+def income_share(df):
+    df["income_share"] = df[['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts',                             'MntGoldProds']].sum(axis=1) / df["Income"]
+    return df
+
+def income_housemember(df):
+    df["income_housemember"] = (df[['Kidhome', 'Teenhome']].sum(axis=1) +1) / df["Income"]
+    return df
