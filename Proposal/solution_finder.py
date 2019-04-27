@@ -79,7 +79,7 @@ samplers =  [
     ("TomekLinks", TomekLinks(random_state=42)),
     ("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
     ("SMOTE", SMOTE(random_state=42, ratio=0.5)),
-    ("SMOTETomek",SMOTETomek(random_state=seed, ratio=0.8))
+    ("SMOTETomek",SMOTETomek(random_state=42, ratio=0.8))
     
     
 ]
