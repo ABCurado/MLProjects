@@ -71,26 +71,31 @@ models = [
 
 scalers = [
     ("StandardScaler", StandardScaler()),
-#    ("RobustScaler", RobustScaler()),
-#    ("MinMaxScaler", MinMaxScaler()),
-#    ("Normalizer", Normalizer()),
-#    ("None", None)
+    ("RobustScaler", RobustScaler()),
+    ("MinMaxScaler", MinMaxScaler()),
+    ("Normalizer", Normalizer()),
+    ("None", None)
 ]
 
 samplers =  [
-#    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
-#    ("TomekLinks", TomekLinks(random_state=42)),
-#    ("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
-#   ("SMOTE", SMOTE(random_state=42, ratio=0.5)),
-#    ("SMOTETomek",SMOTETomek(random_state=42, ratio=0.8)),
+    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
+    ("TomekLinks", TomekLinks(random_state=42)),
+    ("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
+    ("SMOTE", SMOTE(random_state=42, ratio=0.5)),
+    ("SMOTETomek",SMOTETomek(random_state=42, ratio=0.8)),
     ("None", None)
     
 ]
 
 pre_processing_pipelines = [
     ("Joris_Pipeline", preprocessing.joris_preprocessing_pipeline),
-#    ("Morten_Pipeline", preprocessing.morten_preprocessing_pipeline),
-#    ("Bin it!", preprocessing.bin_it_preprocessing_pipeline)
+    ("Morten_Pipeline", preprocessing.morten_preprocessing_pipeline),
+    ("Bin it!", preprocessing.bin_it_preprocessing_pipeline),
+    ("simple_pipeline", preprocessing.simple_pipeline),
+    ("chop_off", preprocessing.chop_off),
+    ("pca_chopoff", preprocessing.pca_chopoff),
+    ("box_cox_pipeline", preprocessing.box_cox_pipeline),
+    ("feature_engineered", preprocessing.feature_engineered)
 
 ]
 seed = [1]
@@ -111,17 +116,22 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
         model_eval = model[1]
     
     model_eval = eval(model_eval)
-
-    y_predicted = utils.cross_validation_average_results(
-        model_eval, X, y, n_splits=5,
-        scaler=scaler[1],
-        sampling_technique=sampler[1]
-    )
-    threshold = utils.max_threshold(y_predicted, y, threshold_range=(0.2, 0.6), iterations=1000, visualization=False)
-    y_pred = utils.predict_with_threshold(y_predicted, threshold)
-    result = utils.profit_share(y_pred, y)
-    precision = utils.calculate_precision_score(y_pred, y)
-    recall = utils.calculate_recall_score(y_pred, y)
+    try:
+        y_predicted = utils.cross_validation_average_results(
+            model_eval, X, y, n_splits=5,
+            scaler=scaler[1],
+            sampling_technique=sampler[1]
+        )
+        threshold = utils.max_threshold(y_predicted, y, threshold_range=(0.2, 0.6), iterations=1000, visualization=False)
+        y_pred = utils.predict_with_threshold(y_predicted, threshold)
+        result = utils.profit_share(y_pred, y)
+        precision = utils.calculate_precision_score(y_pred, y)
+        recall = utils.calculate_recall_score(y_pred, y)
+    except:
+        result = -1
+        recall = -1
+        precision = -1
+        
     time_elapsed = datetime.datetime.now() - start_time
 
     # Create result string
