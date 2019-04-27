@@ -229,11 +229,18 @@ def morten_preprocessing_pipeline(df):
 ##  (Feel Free to use it, if you change it, please let me know)
 
 def joris_preprocessing_pipeline(df):
+    df = impute_income_KNN(df)
     df = encode_education(df)
+    df = feature_engineering.partner_binary(df)
+    df = feature_engineering.income_housemember(df)
+    df = anomalies_treatment(df, "Marital_Status", ["YOLO", "Absurd"])
     df = one_hot_encoding(df,columns = ["Marital_Status"])
     df = encode_days_as_costumer(df)
     df = feature_engineering.drop_useless_columns(df)
-    df = impute_income_KNN(df)
+    df = replace_income(df)
+    df = feature_engineering.responsiveness_share(df)
+    df = feature_engineering.ave_purchase(df)
+    df = feature_engineering.income_share(df)
     return df
 
 
