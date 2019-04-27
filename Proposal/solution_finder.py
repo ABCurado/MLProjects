@@ -45,7 +45,7 @@ models = [
     ("LogisticRegression", 'LogisticRegression()'),
     ("LinearRegression", 'LinearRegression()'),
     # Naive Bayes
-    ("ComplementNB", 'ComplementNB()'),
+    ("GaussianNB", 'GaussianNB()'),
     # SVM
     ("LinearSVC", 'LinearSVC()'),
     ("SVC", 'SVC()'),
