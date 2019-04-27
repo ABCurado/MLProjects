@@ -22,7 +22,9 @@ from ML_algorithms import *
 import pandas as pd
 from seaborn import countplot
 import numpy as np
-from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE
+from imblearn.under_sampling import TomekLinks, EditedNearestNeighbours
+from imblearn.combine import SMOTETomek
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -75,7 +77,12 @@ scalers = [
 
 samplers =  [
     ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
-    ("None", None)
+    ("TomekLinks", TomekLinks(random_state=42)),
+    ("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
+    ("SMOTE", SMOTE(random_state=42, ratio=0.5)),
+    ("SMOTETomek",SMOTETomek(random_state=seed, ratio=0.8))
+    
+    
 ]
 
 pre_processing_pipelines = [
