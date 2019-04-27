@@ -16,8 +16,8 @@ import preprocessing
 from xgboost import XGBClassifier
 import warnings
 warnings.filterwarnings("ignore")
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
-
+from sklearn.preprocessing import *
+from sklearn.ensemble import *
 import feature_engineering
 from ML_algorithms import *
 import pandas as pd
@@ -41,53 +41,56 @@ with open(file_name, "w") as myfile:
 
 
 models = [
-    ("MLPClassifier_10_layers", MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42)),
-    ("MLPClassifier_5_layers", MLPClassifier(hidden_layer_sizes=(5), solver="lbfgs", max_iter=1000, random_state=42)),
-    ("KerasNN_not_fitted", KerasNN_not_fitted()),
-    ("GaussianNB", GaussianNB()),
-    ("MultinomialNB", MultinomialNB()),
-    ("ComplementNB", ComplementNB()),
-    ("SVC", SVC()),
-    ("LinearSVC", LinearSVC()),
-    ("LogisticRegression", LogisticRegression()),
-    ("SGDClassifier", SGDClassifier()),
-    ("KNeighborsClassifier", KNeighborsClassifier()),
-    ("DecisionTreeClassifier", DecisionTreeClassifier(criterion="gini", class_weight=None)),
-    ("XGBClassifier", XGBClassifier(colsample_by_tree=0.1,
-                                   learning_rate=0.89,
-                                   max_depth=8,
-                                   n_estimators=10000,
-                                   eval_metric="auc",
-                                   n_jobs=1, silent=0, verbose=0)),
-    ("MLPClassifier", MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42)),
-    ("LinearRegression", LinearRegression()),
-    ("KerasNN_3layers" , KerasNN_not_fitted(n_layers=3, init="he_normal")),
-    ("KerasNN_6layers" , KerasNN_not_fitted(n_neurons=6, init="he_normal")),
-    ("KerasNN_9layers" , KerasNN_not_fitted(n_neurons=9, init="he_normal")),
-    ("KerasNN_12layers" , KerasNN_not_fitted(n_neurons=12,init="he_normal"))
+    # Regressions
+    ("LogisticRegression", 'LogisticRegression()'),
+    ("LinearRegression", 'LinearRegression()'),
+    # Naive Bayes
+    ("ComplementNB", 'ComplementNB()'),
+    # SVM
+    ("LinearSVC", 'LinearSVC()'),
+    ("SVC", 'SVC()'),
+    # Gradient Descent
+    ("SGDClassifier", 'SGDClassifier()'),
+    # Trees
+    ("DecisionTreeClassifier", 'DecisionTreeClassifier(criterion="gini", class_weight=None)'),
+    ("RandomForestClassifier", "RandomForestClassifier(n_estimators=1000, max_depth=7)"),
+    ("RandomForestRegressor_depth14", "RandomForestRegressor(max_depth=14, random_state=0, n_estimators=1000)"),
+    ("RandomForestRegressor_depth7", "RandomForestRegressor(max_depth=7, random_state=0, n_estimators=1000)"),
+    ("RandomForestRegressor_depth3", "RandomForestRegressor(max_depth=3, random_state=0, n_estimators=1000)"),
+    ("XGBClassifier", 'XGBClassifier(colsample_by_tree=0.4,learning_rate=0.89,\
+                                   max_depth=7, \
+                                   n_estimators=10000, \
+                                   eval_metric="auc", \
+                                   n_jobs=1, silent=0, verbose=0)'),
+    # Neural Nets
+    ("MLPClassifier_10_layers", 'MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42)'),
+    ("MLPClassifier_5_layers", 'MLPClassifier(hidden_layer_sizes=(5), solver="lbfgs", max_iter=1000, random_state=42)'),   
+    ("KerasNN_3layers" , 'KerasNN_not_fitted(n_layers=3, init="he_normal")'),
+    ("KerasNN_12layers" ,'KerasNN_not_fitted(n_neurons=12,init="he_normal")')
 ]
 
 scalers = [
     ("StandardScaler", StandardScaler()),
-    #("RobustScaler", RobustScaler()),
-    ("MinMaxScaler", MinMaxScaler()),
-    ("None", None)
+#    ("RobustScaler", RobustScaler()),
+#    ("MinMaxScaler", MinMaxScaler()),
+#    ("Normalizer", Normalizer()),
+#    ("None", None)
 ]
 
 samplers =  [
-    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
-    #("TomekLinks", TomekLinks(random_state=42)),
-    #("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
-    #("SMOTE", SMOTE(random_state=42, ratio=0.5)),
-    #("SMOTETomek",SMOTETomek(random_state=42, ratio=0.8))
+#    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
+#    ("TomekLinks", TomekLinks(random_state=42)),
+#    ("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
+#   ("SMOTE", SMOTE(random_state=42, ratio=0.5)),
+#    ("SMOTETomek",SMOTETomek(random_state=42, ratio=0.8)),
     ("None", None)
     
 ]
 
 pre_processing_pipelines = [
     ("Joris_Pipeline", preprocessing.joris_preprocessing_pipeline),
-    ("Morten_Pipeline", preprocessing.morten_preprocessing_pipeline),
-    ("Bin it!", preprocessing.bin_it_preprocessing_pipeline)
+#    ("Morten_Pipeline", preprocessing.morten_preprocessing_pipeline),
+#    ("Bin it!", preprocessing.bin_it_preprocessing_pipeline)
 
 ]
 seed = [1]
@@ -99,9 +102,18 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
 
     df = utils.get_dataset()
     df = pre_processing_pipeline[1](df)
+     
     X, y = utils.X_y_split(df)
+  
+    if "Keras" in model[0]:
+        model_eval = model[1][:-1]+",input_dim="+str(X.shape[1])+")"
+    else:
+        model_eval = model[1]
+    
+    model_eval = eval(model_eval)
+
     y_predicted = utils.cross_validation_average_results(
-        model[1], X, y, n_splits=5,
+        model_eval, X, y, n_splits=5,
         scaler=scaler[1],
         sampling_technique=sampler[1]
     )
