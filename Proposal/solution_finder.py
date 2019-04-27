@@ -35,7 +35,7 @@ from subprocess import call
 file_name= "LogFiles/" + "results_"+ str(datetime.datetime.now().hour) + \
             "_" + str(datetime.datetime.now().minute) +"_log.csv"
 
-header_string = "Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,result_profit"
+header_string = "Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,precision,recall,result_profit"
 with open(file_name, "w") as myfile:
     myfile.write(header_string + "\n")
 
@@ -69,18 +69,18 @@ models = [
 
 scalers = [
     ("StandardScaler", StandardScaler()),
-    ("RobustScaler", RobustScaler()),
-    ("MinMaxScaler", MinMaxScaler()),
+    #("RobustScaler", RobustScaler()),
+    #("MinMaxScaler", MinMaxScaler()),
     ("None", None)
 ]
 
 samplers =  [
-    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
-    ("TomekLinks", TomekLinks(random_state=42)),
-    ("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
-    ("SMOTE", SMOTE(random_state=42, ratio=0.5)),
-    ("SMOTETomek",SMOTETomek(random_state=42, ratio=0.8))
-    
+    #("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
+    #("TomekLinks", TomekLinks(random_state=42)),
+    #("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
+    #("SMOTE", SMOTE(random_state=42, ratio=0.5)),
+    #("SMOTETomek",SMOTETomek(random_state=42, ratio=0.8))
+    ("None", None)
     
 ]
 
@@ -108,12 +108,13 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
     threshold = utils.max_threshold(y_predicted, y, threshold_range=(0.2, 0.6), iterations=1000, visualization=False)
     y_pred = utils.predict_with_threshold(y_predicted, threshold)
     result = utils.profit_share(y_pred, y)
-
+    precision = utils.calculate_pecision_score(y_pred, y)
+    recall = utils.calculate_recall_score(y_pred, y)
     time_elapsed = datetime.datetime.now() - start_time
     # Create result string
     result_string = ",".join(
         [model[0],
-         pre_processing_pipeline[0], scaler[0], sampler[0], str(time_elapsed), str(result)
+         pre_processing_pipeline[0], scaler[0], sampler[0], str(time_elapsed),str(precision),str(recall), str(result)
          ])
     # Write result to a file
     with open(file_name, "a") as myfile:
@@ -128,8 +129,8 @@ if __name__ ==  '__main__':
     possible_values = list(itertools.product(*[models,pre_processing_pipelines,scalers,samplers, seed]))
 
     core_count = multiprocessing.cpu_count()
-    print("All possible combinations generated:")
-    print(possible_values)
+    #print("All possible combinations generated:")
+    #print(possible_values)
     print(len(possible_values))
     print("Number of cpu cores: "+str(core_count))
     print()
