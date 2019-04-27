@@ -18,6 +18,7 @@ import warnings
 warnings.filterwarnings("ignore")
 from sklearn.preprocessing import *
 from sklearn.ensemble import *
+from sklearn.linear_model import *
 import feature_engineering
 from ML_algorithms import *
 import pandas as pd
@@ -35,7 +36,7 @@ from subprocess import call
 file_name= "LogFiles/" + "results_"+ str(datetime.datetime.now().hour) + \
             "_" + str(datetime.datetime.now().minute) +"_log.csv"
 
-header_string = "Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,precision,recall,result_profit"
+header_string = "Seed,Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,precision,recall,result_profit"
 with open(file_name, "w") as myfile:
     myfile.write(header_string + "\n")
 
@@ -44,6 +45,9 @@ models = [
     # Regressions
     ("LogisticRegression", 'LogisticRegression()'),
     ("LinearRegression", 'LinearRegression()'),
+    ("OrthogonalMatchingPursuit",OrthogonalMatchingPursuit(n_nonzero_coefs=14)),
+    ("Lasso",Lasso(alpha=0.001)),
+    ("BayesianRidge", BayesianRidge()),
     # Naive Bayes
     ("GaussianNB", 'GaussianNB()'),
     # SVM
@@ -52,21 +56,32 @@ models = [
     # Gradient Descent
     ("SGDClassifier", 'SGDClassifier()'),
     # Trees
-    ("DecisionTreeClassifier", 'DecisionTreeClassifier(criterion="gini", class_weight=None)'),
+    ("DecisionTreeClassifier_gini", 'DecisionTreeClassifier(criterion="gini", class_weight=None)'),
+    ("DecisionTreeClassifier_entropy", 'DecisionTreeClassifier(criterion="entropy", class_weight=None)'),
     ("RandomForestClassifier", "RandomForestClassifier(n_estimators=1000, max_depth=7)"),
     ("RandomForestRegressor_depth14", "RandomForestRegressor(max_depth=14, random_state=0, n_estimators=1000)"),
     ("RandomForestRegressor_depth7", "RandomForestRegressor(max_depth=7, random_state=0, n_estimators=1000)"),
     ("RandomForestRegressor_depth3", "RandomForestRegressor(max_depth=3, random_state=0, n_estimators=1000)"),
-    ("XGBClassifier", 'XGBClassifier(colsample_by_tree=0.4,learning_rate=0.89,\
+    ("XGBClassifier_depth7", 'XGBClassifier(colsample_by_tree=0.4,learning_rate=0.89,\
+                                   max_depth=14, \
+                                   n_estimators=10000, \
+                                   eval_metric="auc", \
+                                   n_jobs=1, silent=0, verbose=0)'),
+    ("XGBClassifier_depth7", 'XGBClassifier(colsample_by_tree=0.4,learning_rate=0.89,\
                                    max_depth=7, \
                                    n_estimators=10000, \
                                    eval_metric="auc", \
                                    n_jobs=1, silent=0, verbose=0)'),
+    ("XGBClassifier_depth3", 'XGBClassifier(colsample_by_tree=0.4,learning_rate=0.89,\
+                               max_depth=3, \
+                               n_estimators=10000, \
+                               eval_metric="auc", \
+                               n_jobs=1, silent=0, verbose=0)'),
     # Neural Nets
     ("MLPClassifier_10_layers", 'MLPClassifier(hidden_layer_sizes=(10), solver="lbfgs", max_iter=1000, random_state=42)'),
     ("MLPClassifier_5_layers", 'MLPClassifier(hidden_layer_sizes=(5), solver="lbfgs", max_iter=1000, random_state=42)'),   
-    ("KerasNN_3layers" , 'KerasNN_not_fitted(n_layers=3, init="he_normal")'),
-    ("KerasNN_12layers" ,'KerasNN_not_fitted(n_neurons=12,init="he_normal")')
+    ("KerasNN_3neurons" , 'KerasNN_not_fitted(n_neurons=3, init="he_normal")'),
+    ("KerasNN_12neurons" ,'KerasNN_not_fitted(n_neurons=12,init="he_normal")')
 ]
 
 scalers = [
@@ -78,7 +93,9 @@ scalers = [
 ]
 
 samplers =  [
-    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
+    ("RandomOverSampler_0.2", RandomOverSampler(random_state=42, ratio=0.2)),
+    ("RandomOverSampler_0.5", RandomOverSampler(random_state=42, ratio=0.5)),
+    ("RandomOverSampler_0.5", RandomOverSampler(random_state=42, ratio=0.35)),
     ("TomekLinks", TomekLinks(random_state=42)),
     ("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
     ("SMOTE", SMOTE(random_state=42, ratio=0.5)),
@@ -136,7 +153,7 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
 
     # Create result string
     result_string = ",".join(
-        [model[0],
+        [str(seed),model[0],
          pre_processing_pipeline[0], scaler[0], sampler[0], str(time_elapsed),str(precision),str(recall), str(result)
          ])
     # Write result to a file
