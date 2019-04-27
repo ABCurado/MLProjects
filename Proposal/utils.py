@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
 from sklearn.model_selection import KFold, LeaveOneOut
 import data_visualization
+import keras
 
 def get_dataset():
     '''
@@ -123,9 +124,13 @@ def cross_validation_average_results(model, X, y, n_splits=5, sampling_technique
             
         if sampling_technique is not None:
             X_train, y_train = sampling_technique.fit_resample(X_train, y_train)            
+        
+        if type(model) == keras.engine.sequential.Sequential:
+            model.fit(X_train, y_train, epochs=100, verbose=0)
+        else:
+            model.fit(X_train, y_train)
             
-        estimator = model.fit(X_train, y_train)
-        prediction = estimator.predict(X_test)
+        prediction = model.predict(X_test)
         predictions.extend(prediction)
     return np.array(predictions)
 
@@ -158,9 +163,14 @@ def leave_one_out_cross_validation_average_results(model, X, y, n_splits=5, scal
             
         if sampling_technique is not None:
             X_train, y_train = sampling_technique.fit_resample(X_train, y_train)            
+        
+        if type(model) == keras.engine.sequential.Sequential:
+            model.fit(X_train, y_train, epochs=100, verbose=0)
+        else:
+            model.fit(X_train, y_train)
             
-        estimator = model.fit(X_train, y_train)
-        prediction = estimator.predict(X_test)
+        model.fit(X_train, y_train)
+        prediction = model.predict(X_test)
         predictions.extend(prediction)
     return np.array(predictions)
 
@@ -255,5 +265,5 @@ def Cross_Val_Models(models, X, y, scaler=None, n_splits=5, sampling_technique=N
         y_predicted = cross_validation_average_results(models[model], X, y, n_splits,scaler=scaler,sampling_technique=sampling_technique)
         threshold = max_threshold(y_predicted, y, threshold_range = (0.1, 0.99),iterations=1000, visualization=True)
         y_pred = predict_with_threshold(y_predicted,threshold)
-        results[model] = profit_share(y_predicted, y)
+        results[model] = profit_share(y_pred, y)
     return results
