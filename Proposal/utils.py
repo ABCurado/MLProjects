@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
 from sklearn.model_selection import KFold, LeaveOneOut
-import data_visualization
+#import data_visualization
 import keras
 
 def get_dataset():
@@ -117,19 +117,16 @@ def cross_validation_average_results(model, X, y, n_splits=5, sampling_technique
     for train_index, test_index in kf.split(X):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, _ = y.iloc[train_index], y.iloc[test_index]
-        
         if scaler is not None:
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.transform(X_test)
             
         if sampling_technique is not None:
             X_train, y_train = sampling_technique.fit_resample(X_train, y_train)            
-        
         if type(model) == keras.engine.sequential.Sequential:
             model.fit(X_train, y_train, epochs=100, verbose=0)
         else:
             model.fit(X_train, y_train)
-            
         prediction = model.predict(X_test)
         predictions.extend(prediction)
     return np.array(predictions)
@@ -199,7 +196,8 @@ def max_threshold(y_pred, y_test, threshold_range = (0.4, 0.6), iterations = 100
     profits = np.array(profits)
     thresholds = np.array(thresholds)
     if visualization:
-        data_visualization.arg_max_plot(thresholds, profits)
+        pass
+    #    data_visualization.arg_max_plot(thresholds, profits)
     return thresholds[np.argmax(profits)]
 
 def predict_with_threshold(y_pred_cont, threshold):
@@ -223,7 +221,8 @@ def threshold_optimization(y_pred_cont, y_test, threshold_range = (0.4, 0.6), it
         profits.append(profit)
     
     if visualization:
-        data_visualization.xy_plot(x=thresholds, y=profits)
+        pass
+    #    data_visualization.xy_plot(x=thresholds, y=profits)
     
     return profits, thresholds
 

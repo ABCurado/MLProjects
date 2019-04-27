@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 
 import utils
 import preprocessing
-import data_visualization
+#import data_visualization
 from xgboost import XGBClassifier
 import warnings
 warnings.filterwarnings("ignore")
@@ -21,7 +21,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 import feature_engineering
 from ML_algorithms import *
 import pandas as pd
-from seaborn import countplot
+#from seaborn import countplot
 import numpy as np
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 from imblearn.under_sampling import TomekLinks, EditedNearestNeighbours
@@ -70,12 +70,12 @@ models = [
 scalers = [
     ("StandardScaler", StandardScaler()),
     #("RobustScaler", RobustScaler()),
-    #("MinMaxScaler", MinMaxScaler()),
+    ("MinMaxScaler", MinMaxScaler()),
     ("None", None)
 ]
 
 samplers =  [
-    #("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
+    ("RandomOverSampler", RandomOverSampler(random_state=42, ratio=0.5)),
     #("TomekLinks", TomekLinks(random_state=42)),
     #("EditedNN", EditedNearestNeighbours(random_state=42, n_neighbors=3)),
     #("SMOTE", SMOTE(random_state=42, ratio=0.5)),
