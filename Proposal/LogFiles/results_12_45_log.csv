@@ -1,0 +1,6 @@
+Seed,Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,precision,recall,result_profit
+1,KerasNN_15l_38n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:19.410914,0.789156626506,0.729805013928,0.657
+1,KerasNN_15l_36n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:21.515106,0.771084337349,0.764179104478,0.679
+1,KerasNN_15l_37n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:22.003946,0.765060240964,0.781538461538,0.692
+1,KerasNN_15l_40n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:00.969926,0.756024096386,0.765243902439,0.673
+1,KerasNN_15l_39n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:03.208653,0.768072289157,0.752212389381,0.667
