@@ -1,0 +1,109 @@
+Seed,Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,precision,recall,result_profit
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,RobustScaler,TomekLinks,0:01:03.115497,0.581325301205,0.765873015873,0.559
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,StandardScaler,None,0:01:05.892275,0.566265060241,0.846846846847,0.604
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,StandardScaler,RandomOverSampler_0.2,0:01:08.215247,0.599397590361,0.832635983264,0.624
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,RobustScaler,None,0:01:08.445551,0.557228915663,0.761316872428,0.534
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,RobustScaler,RandomOverSampler_0.2,0:01:09.785695,0.620481927711,0.762962962963,0.588
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,StandardScaler,RandomOverSampler_0.5,0:01:16.959986,0.701807228916,0.710365853659,0.597
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,StandardScaler,RandomOverSampler_0.35,0:01:17.168108,0.686746987952,0.553398058252,0.459
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,StandardScaler,RandomOverSampler_0.35,0:01:07.317496,0.64156626506,0.717171717172,0.567
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:01:19.281612,0.722891566265,0.664819944598,0.569
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,StandardScaler,TomekLinks,0:01:06.742095,0.620481927711,0.780303030303,0.601
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,StandardScaler,TomekLinks,0:01:10.961430,0.638554216867,0.590529247911,0.465
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:01:10.198181,0.665662650602,0.68,0.552
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,StandardScaler,None,0:01:02.582346,0.581325301205,0.807531380753,0.589
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,RobustScaler,TomekLinks,0:01:05.309688,0.617469879518,0.732142857143,0.562
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,StandardScaler,None,0:01:10.922208,0.698795180723,0.549763033175,0.461
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,RobustScaler,RandomOverSampler_0.2,0:01:04.595755,0.593373493976,0.735074626866,0.546
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,RobustScaler,None,0:01:04.696952,0.596385542169,0.758620689655,0.566
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,RobustScaler,RandomOverSampler_0.2,0:01:09.427599,0.545180722892,0.724,0.497
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,StandardScaler,RandomOverSampler_0.2,0:01:05.160664,0.60843373494,0.804780876494,0.611
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,RobustScaler,RandomOverSampler_0.5,0:01:16.481473,0.69578313253,0.661891117479,0.553
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,RobustScaler,RandomOverSampler_0.5,0:01:24.343984,0.780120481928,0.541841004184,0.485
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,RobustScaler,RandomOverSampler_0.35,0:01:11.331968,0.596385542169,0.694736842105,0.518
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,StandardScaler,RandomOverSampler_0.5,0:01:16.885878,0.698795180723,0.763157894737,0.64
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,RobustScaler,RandomOverSampler_0.35,0:01:16.663599,0.786144578313,0.524096385542,0.471
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,RobustScaler,TomekLinks,0:01:02.850497,0.578313253012,0.764940239044,0.556
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,StandardScaler,RandomOverSampler_0.35,0:01:11.742986,0.698795180723,0.738853503185,0.619
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,RobustScaler,TomekLinks,0:01:07.358705,0.590361445783,0.664406779661,0.492
+1,KerasNN_6l_16n_or_iu_lm_d4,Joris_Pipeline,RobustScaler,None,0:01:03.795704,0.60843373494,0.731884057971,0.555
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,StandardScaler,TomekLinks,0:01:01.950088,0.638554216867,0.762589928058,0.601
+1,KerasNN_6l_12n_or_iu_lb_d4,Joris_Pipeline,RobustScaler,None,0:01:07.625709,0.656626506024,0.607242339833,0.488
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,StandardScaler,RandomOverSampler_0.2,0:01:04.824089,0.596385542169,0.821576763485,0.613
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,StandardScaler,None,0:01:03.274031,0.60843373494,0.7890625,0.599
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,StandardScaler,RandomOverSampler_0.2,0:01:08.608296,0.692771084337,0.58524173028,0.488
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,RobustScaler,RandomOverSampler_0.2,0:01:06.183731,0.58734939759,0.764705882353,0.563
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,StandardScaler,RandomOverSampler_0.5,0:01:18.294996,0.722891566265,0.729483282675,0.625
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,StandardScaler,RandomOverSampler_0.5,0:01:22.572415,0.756024096386,0.531779661017,0.467
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,StandardScaler,RandomOverSampler_0.35,0:01:12.325172,0.680722891566,0.776632302405,0.64
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,RobustScaler,RandomOverSampler_0.5,0:01:18.777515,0.64156626506,0.75,0.593
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,StandardScaler,RandomOverSampler_0.35,0:01:17.672916,0.734939759036,0.583732057416,0.505
+1,KerasNN_6l_16n_or_iu_lm_d4,Morten_Pipeline,StandardScaler,TomekLinks,0:01:05.601287,0.635542168675,0.770072992701,0.604
+1,KerasNN_6l_16n_or_iu_lm_d4,Bin it!,RobustScaler,RandomOverSampler_0.35,0:01:14.228866,0.680722891566,0.755852842809,0.623
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,StandardScaler,TomekLinks,0:01:07.047629,0.698795180723,0.587341772152,0.492
+1,KerasNN_6l_12n_or_iu_lm_d2,Joris_Pipeline,StandardScaler,None,0:01:03.521579,0.638554216867,0.794007490637,0.625
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:01:22.433540,0.774096385542,0.551502145923,0.491
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,StandardScaler,None,0:01:07.499369,0.596385542169,0.644951140065,0.481
+1,KerasNN_6l_12n_or_iu_lm_d2,Joris_Pipeline,RobustScaler,RandomOverSampler_0.2,0:01:04.085599,0.626506024096,0.722222222222,0.561
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:01:15.270784,0.689759036145,0.618918918919,0.515
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,RobustScaler,RandomOverSampler_0.2,0:01:08.024373,0.686746987952,0.589147286822,0.488
+1,KerasNN_6l_12n_or_iu_lm_d2,Joris_Pipeline,RobustScaler,RandomOverSampler_0.5,0:01:16.280253,0.71686746988,0.638069705094,0.544
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,RobustScaler,TomekLinks,0:01:06.681395,0.620481927711,0.626139817629,0.483
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,RobustScaler,TomekLinks,0:01:01.922062,0.659638554217,0.725165562914,0.585
+1,KerasNN_6l_12n_or_iu_lm_d2,Joris_Pipeline,RobustScaler,RandomOverSampler_0.35,0:01:11.983207,0.704819277108,0.676300578035,0.57
+1,KerasNN_6l_12n_or_iu_lb_d4,Morten_Pipeline,RobustScaler,None,0:01:09.560987,0.605421686747,0.688356164384,0.52
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,RobustScaler,None,0:01:02.177627,0.635542168675,0.764492753623,0.6
+1,KerasNN_6l_12n_or_iu_lm_d2,Joris_Pipeline,RobustScaler,TomekLinks,0:01:03.565995,0.64156626506,0.722033898305,0.571
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,StandardScaler,RandomOverSampler_0.2,0:01:09.069197,0.623493975904,0.674267100977,0.522
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,StandardScaler,RandomOverSampler_0.2,0:01:03.836299,0.704819277108,0.745222929936,0.628
+1,KerasNN_6l_12n_or_iu_lm_d2,Joris_Pipeline,RobustScaler,None,0:01:03.334660,0.626506024096,0.759124087591,0.589
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,StandardScaler,RandomOverSampler_0.5,0:01:24.757328,0.759036144578,0.56,0.493
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,StandardScaler,RandomOverSampler_0.5,0:01:18.578253,0.765060240964,0.675531914894,0.598
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,StandardScaler,RandomOverSampler_0.2,0:01:00.945537,0.632530120482,0.75,0.587
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,StandardScaler,RandomOverSampler_0.35,0:01:11.191504,0.683734939759,0.746710526316,0.617
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,StandardScaler,RandomOverSampler_0.35,0:01:16.800607,0.671686746988,0.580729166667,0.474
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,StandardScaler,RandomOverSampler_0.5,0:01:17.632167,0.713855421687,0.679083094556,0.577
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,StandardScaler,TomekLinks,0:01:02.891228,0.704819277108,0.745222929936,0.628
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,StandardScaler,TomekLinks,0:01:07.266863,0.617469879518,0.650793650794,0.5
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,StandardScaler,RandomOverSampler_0.35,0:01:12.117346,0.698795180723,0.684365781711,0.574
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,StandardScaler,None,0:01:03.621697,0.64156626506,0.747368421053,0.591
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,StandardScaler,None,0:01:08.411567,0.668674698795,0.649122807018,0.529
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,StandardScaler,TomekLinks,0:01:02.323108,0.620481927711,0.762962962963,0.588
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.2,0:01:03.483056,0.674698795181,0.749163879599,0.614
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,RobustScaler,RandomOverSampler_0.2,0:01:08.739222,0.626506024096,0.643962848297,0.5
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,StandardScaler,None,0:01:03.256828,0.647590361446,0.757042253521,0.603
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.5,0:01:17.519597,0.737951807229,0.648148148148,0.562
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,RobustScaler,RandomOverSampler_0.5,0:01:24.201952,0.710843373494,0.546296296296,0.463
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.2,0:01:04.971234,0.671686746988,0.717041800643,0.586
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.35,0:01:10.555164,0.665662650602,0.708333333333,0.575
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,RobustScaler,RandomOverSampler_0.35,0:01:17.522591,0.704819277108,0.604651162791,0.51
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:01:18.797202,0.740963855422,0.598540145985,0.52
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,RobustScaler,TomekLinks,0:00:59.689974,0.656626506024,0.707792207792,0.569
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,RobustScaler,TomekLinks,0:01:08.457236,0.617469879518,0.617469879518,0.474
+1,KerasNN_6l_12n_or_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:01:11.383518,0.734939759036,0.67032967033,0.58
+1,KerasNN_6l_12n_or_iu_lm_d2,Bin it!,RobustScaler,None,0:01:02.442358,0.650602409639,0.791208791209,0.632
+1,KerasNN_6l_12n_or_iu_lb_d4,Bin it!,RobustScaler,None,0:01:07.494634,0.581325301205,0.694244604317,0.507
+1,KerasNN_6l_12n_or_iu_lb_d2,Joris_Pipeline,RobustScaler,RandomOverSampler_0.5,0:01:17.828650,0.686746987952,0.614555256065,0.509
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,StandardScaler,RandomOverSampler_0.2,0:01:01.881707,0.656626506024,0.643067846608,0.517
+1,KerasNN_6l_12n_or_iu_lb_d2,Joris_Pipeline,RobustScaler,RandomOverSampler_0.35,0:00:59.223860,0.713855421687,0.585185185185,0.497
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,StandardScaler,RandomOverSampler_0.5,0:01:02.758964,0.725903614458,0.595061728395,0.511
+1,KerasNN_6l_12n_or_iu_lb_d2,Joris_Pipeline,RobustScaler,TomekLinks,0:00:51.967582,0.71686746988,0.56,0.477
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,StandardScaler,RandomOverSampler_0.35,0:00:58.297625,0.698795180723,0.6391184573,0.536
+1,KerasNN_6l_12n_or_iu_lb_d2,Joris_Pipeline,RobustScaler,None,0:00:52.709759,0.692771084337,0.628415300546,0.524
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,StandardScaler,TomekLinks,0:00:51.214868,0.683734939759,0.671597633136,0.555
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,StandardScaler,RandomOverSampler_0.2,0:00:52.767259,0.623493975904,0.683168316832,0.528
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,StandardScaler,None,0:00:51.811615,0.638554216867,0.668769716088,0.527
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,StandardScaler,RandomOverSampler_0.5,0:01:01.297086,0.632530120482,0.596590909091,0.467
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,RobustScaler,RandomOverSampler_0.2,0:00:52.214931,0.66265060241,0.658682634731,0.533
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,StandardScaler,RandomOverSampler_0.35,0:00:58.257200,0.677710843373,0.63202247191,0.519
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,RobustScaler,RandomOverSampler_0.5,0:01:02.574084,0.713855421687,0.586633663366,0.498
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,StandardScaler,TomekLinks,0:00:51.430726,0.632530120482,0.666666666667,0.521
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,RobustScaler,RandomOverSampler_0.35,0:00:58.035368,0.680722891566,0.63661971831,0.525
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,StandardScaler,None,0:00:52.350087,0.614457831325,0.647619047619,0.495
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,RobustScaler,TomekLinks,0:00:51.842540,0.71686746988,0.613402061856,0.523
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.2,0:00:52.796220,0.611445783133,0.685810810811,0.522
+1,KerasNN_6l_12n_or_iu_lb_d2,Bin it!,RobustScaler,None,0:00:52.132096,0.737951807229,0.638020833333,0.553
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:00:48.634094,0.701807228916,0.597435897436,0.502
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:00:42.778019,0.665662650602,0.638728323699,0.518
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,RobustScaler,TomekLinks,0:00:38.016080,0.692771084337,0.657142857143,0.548
+1,KerasNN_6l_12n_or_iu_lb_d2,Morten_Pipeline,RobustScaler,None,0:00:39.018079,0.683734939759,0.663742690058,0.549

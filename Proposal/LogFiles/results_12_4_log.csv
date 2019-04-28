@@ -1,0 +1,17 @@
+Seed,Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,precision,recall,result_profit
+1,KerasNN_12l_36n_or_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:02:15.466685,0.737951807229,0.775316455696,0.672
+1,KerasNN_12l_36n_or_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.5,0:02:16.024220,0.746987951807,0.733727810651,0.641
+1,KerasNN_12l_36n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:02:23.753071,0.69578313253,0.764900662252,0.639
+1,KerasNN_12l_36n_or_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:01:51.504977,0.710843373494,0.726153846154,0.615
+1,KerasNN_12l_36n_or_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.35,0:01:51.851128,0.753012048193,0.759878419453,0.666
+1,KerasNN_12l_36n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:11.050271,0.728915662651,0.793442622951,0.683
+1,KerasNN_15l_36n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:02:33.100785,0.80421686747,0.71581769437,0.65
+1,KerasNN_12l_36n_oa_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.5,0:02:39.857376,0.78313253012,0.744985673352,0.668
+1,KerasNN_15l_36n_oa_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.5,0:02:31.636519,0.78313253012,0.368794326241,0.33
+1,KerasNN_15l_36n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:16.234011,0.731927710843,0.747692307692,0.645
+1,KerasNN_12l_36n_oa_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.35,0:02:20.942623,0.765060240964,0.776758409786,0.687
+1,KerasNN_15l_36n_oa_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.35,0:02:11.399371,0.701807228916,0.758957654723,0.638
+1,KerasNN_15l_36n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.5,0:02:19.750126,0.759036144578,0.7875,0.694
+1,KerasNN_15l_36n_oa_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.5,0:02:16.588677,0.792168674699,0.745042492918,0.672
+1,KerasNN_15l_36n_oa_iu_lm_d2,Morten_Pipeline,RobustScaler,RandomOverSampler_0.35,0:02:00.857901,0.774096385542,0.781155015198,0.696
+1,KerasNN_15l_36n_oa_iu_lm_d2,Bin it!,RobustScaler,RandomOverSampler_0.35,0:01:59.760161,0.722891566265,0.745341614907,0.638
