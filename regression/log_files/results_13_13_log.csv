@@ -1,0 +1,5 @@
+Seed,Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,mean_s_error,explained_variance
+1,KerasNN_3neurons,None,StandardScaler,None,0:00:07.306445,138.39561873148097,-290835.87294411816
+1,KerasNN_3neurons,None,None,None,0:00:07.307976,138.34314060383517,-3701669263.236557
+1,KerasNN_12neurons,None,StandardScaler,None,0:00:07.430299,138.34253246753246,0.0
+1,KerasNN_12neurons,None,None,None,0:00:04.630361,138.34253246753246,0.0
