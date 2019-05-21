@@ -26,15 +26,13 @@ with open(file_name, "w") as myfile:
 
 
 models = [
-    #Simple Keras NN  
-#    ("KerasNN_3neurons" , 'KerasNN_not_fitted(n_neurons=3, init="he_normal")'),
-    ("XGBoot", 'XB_Boost()'),
+     ("XGBoot", 'XB_Boost()'),
     ("LinearRegression", 'Linear_Regression()'),
-    ('GS_GP', 'GS_GP()')
+    ('GS_GP', 'GS_GP(seed=0, verbose=False , population_size=500)')
 ]
 
 scalers = [
-    ("StandardScaler", StandardScaler()),
+#    ("StandardScaler", StandardScaler()),
     ("None", None)
 ]
 
@@ -45,9 +43,11 @@ samplers =  [
 
 pre_processing_pipelines = [
     ("None", None)
+
 ]
 seed = [1]
 
+export_GS_GP_model = False
 
 def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
 
@@ -56,14 +56,15 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
     df = utils.get_dataset()
     if pre_processing_pipeline[1] != None:
         df = pre_processing_pipeline[1](df)
-     
     X, y = utils.X_y_split(df)
-  
+
     if "Keras" in model[0]:
         model_eval = model[1][:-1]+",input_dim="+str(X.shape[1])+")"
+    elif "GS_GP" in model[0]:
+        model_eval = model[1][:-1]+",feature_names="+str(list(X.columns))+")"
     else:
         model_eval = model[1]
-    
+
     model_eval = eval(model_eval)
     try:
         y_predicted = utils.cross_validation_average_results(
@@ -73,7 +74,7 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
         )
         mean_s_error = utils.calculate_mean_squared_error(y_predicted, y)
         explained_variance = utils.calculate_explained_variance_score(y_predicted, y)
-    except ex:
+    except:
         result = -1
         recall = -1
         precision = -1
@@ -83,12 +84,17 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
     # Create result string
     result_string = ",".join(
         [str(seed),model[0],
-         pre_processing_pipeline[0], scaler[0], sampler[0], str(time_elapsed),str(mean_s_error),str(explained_variance)         ])
+         pre_processing_pipeline[0], scaler[0], sampler[0], str(time_elapsed),str(mean_s_error),str(explained_variance)])
     # Write result to a file
     with open(file_name, "a") as myfile:
         myfile.write(result_string + "\n")
-    # Output result to terminal
+
     print(model[0]+": "+str(mean_s_error))
+
+    if 'GS_GP' in model[1]:
+        idx = model_eval._program.parents['parent_idx']
+        fade_nodes = model_eval._program.parents['parent_nodes']
+        print(model_eval._programs[-2][idx])
 
 
 if __name__ ==  '__main__':

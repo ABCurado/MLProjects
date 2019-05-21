@@ -108,7 +108,7 @@ def calculate_confusion_matrix(y_true, y_pred):
     '''
     return confusion_matrix(y_true, y_pred)
 
-def cross_validation_average_results(model, X, y, n_splits=5, sampling_technique=None, scaler=None, **model_kwargs):
+def cross_validation_average_results(model, X, y, n_splits=5, sampling_technique=None, scaler=None):
     '''
         Does cross validation with n_splits and returns an array with y size as predictions.
         !!!!Currently not working with transformations calculated on train data and applied in test data!!!

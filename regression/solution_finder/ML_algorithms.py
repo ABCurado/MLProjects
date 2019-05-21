@@ -100,11 +100,12 @@ def XB_Boost():
                                   n_jobs=-1, silent=0, verbose=1)
     return xgbc
 
-def GS_GP():
-    est_gp = SymbolicRegressor(population_size=50,
+def GS_GP(seed = 0, verbose=False,feature_names=None,population_size=50):
+    est_gp = SymbolicRegressor(population_size=population_size,
                                generations=20, stopping_criteria=0.01,
                                p_crossover=0.7, p_subtree_mutation=0.1,
                                p_hoist_mutation=0.05, p_point_mutation=0.1,
-                               max_samples=0.9, verbose=1,
-                               parsimony_coefficient=0.01, random_state=0)
+                               max_samples=0.9, verbose=verbose,
+                               parsimony_coefficient=0.01, random_state=seed,
+                               feature_names=feature_names)
     return est_gp
