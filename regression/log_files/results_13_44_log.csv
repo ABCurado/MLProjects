@@ -1,5 +1,0 @@
-Seed,Algorithm,Parameters,Preprocessing Pipeline,Scaling,Sampling,time,mean_s_error,explained_variance
-1,LinearRegression,None,StandardScaler,None,0:00:00.039092,6.297737062222527,-0.8917628984354653
-1,LinearRegression,None,None,None,0:00:00.043650,6.5907524604301955,-0.7174663682079645
-1,GS_GP,None,StandardScaler,None,0:00:08.780685,125.31451170283603,-0.16712869325868462
-1,GS_GP,None,None,None,0:00:10.469409,79.6873506935313,-0.09361322877421485
