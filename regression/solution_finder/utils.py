@@ -91,6 +91,14 @@ def calculate_mean_squared_error(y_true, y_pred):
     '''
     return mean_squared_error(y_true, y_pred)
 
+def calculate_mean_absolute_error(y_true, y_pred):
+    '''
+        Mean squared error regression loss
+    '''
+    return mean_absolute_error(y_true, y_pred)
+
+
+
 def calculate_explained_variance_score(y_true, y_pred):
     '''
         Explained variance regression score function
@@ -124,6 +132,7 @@ def cross_validation_average_results(model, X, y, n_splits=5, sampling_technique
         returns     |||||||||||||||  <- which represents the predictions for the whole array
         
     '''
+
     kf = KFold(n_splits=n_splits, shuffle=False)
     predictions = []
     for train_index, test_index in kf.split(X):

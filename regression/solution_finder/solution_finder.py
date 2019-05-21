@@ -26,9 +26,15 @@ with open(file_name, "w") as myfile:
 
 
 models = [
-     ("XGBoot", 'XB_Boost()'),
     ("LinearRegression", 'Linear_Regression()'),
-    ('GS_GP', 'GS_GP(seed=0, verbose=False , population_size=500)')
+    ("DecisionTreeRegressor", 'Decision_Tree(criterion="mse")'),
+    ("Gradient_Tree_Boosting","Gradient_Tree_Boosting(verbose=False)"),
+    ("Adaptive_Tree_Boosting",'Adaptive_Tree_Boosting(loss="linear")'),
+    ("Tree_Bagging", "Tree_Bagging(verbose=False)"),
+    ("Random_Tree_Forest", "Random_Tree_Forest(verbose=False)"),
+    ('GS_GP', 'GS_GP(verbose=False , population_size=20)'),
+    ("XGBoost", 'XG_Boost(n_estimators=100)')
+
 ]
 
 scalers = [
@@ -45,7 +51,7 @@ pre_processing_pipelines = [
     ("None", None)
 
 ]
-seed = [1]
+seed = [0,1]
 
 export_GS_GP_model = False
 
@@ -61,7 +67,11 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
     if "Keras" in model[0]:
         model_eval = model[1][:-1]+",input_dim="+str(X.shape[1])+")"
     elif "GS_GP" in model[0]:
-        model_eval = model[1][:-1]+",feature_names="+str(list(X.columns))+")"
+        model_eval = model[1][:-1]+",seed="+str(seed)+",feature_names="+str(list(X.columns))+")"
+    elif "Tree" in model[0]:
+        model_eval = model[1][:-1]+",random_state="+str(seed)+")"
+    elif "XG" in model[0]:
+        model_eval = model[1][:-1]+",seed=" + str(seed) + ")"
     else:
         model_eval = model[1]
 
@@ -72,13 +82,12 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
             scaler=scaler[1],
             sampling_technique=sampler[1]
         )
-        mean_s_error = utils.calculate_mean_squared_error(y_predicted, y)
+        mean_s_error = utils.calculate_mean_absolute_error(y_predicted, y)
         explained_variance = utils.calculate_explained_variance_score(y_predicted, y)
     except:
-        result = -1
-        recall = -1
-        precision = -1
-        
+        mean_s_error = -1
+        explained_variance = -1
+
     time_elapsed = datetime.datetime.now() - start_time
 
     # Create result string
