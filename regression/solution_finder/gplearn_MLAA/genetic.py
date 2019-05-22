@@ -55,6 +55,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     max_samples = params['max_samples']
     feature_names = params['feature_names']
     semantical_computation = params["semantical_computation"]
+    special_fitness = params['special_fitness']
 
     max_samples = int(max_samples * n_samples)
 
@@ -149,7 +150,8 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                            feature_names=feature_names,
                            random_state=random_state,
                            program=program,
-                           semantical_computation=semantical_computation)
+                           semantical_computation=semantical_computation,
+                           special_fitness=special_fitness)
 
         program.parents = genome
 
@@ -224,6 +226,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  p_gs_crossover=0.0,
                  p_gs_mutation=0.0,
                  semantical_computation=False,
+                 special_fitness=False,
                  p_subtree_mutation=0.01,
                  p_hoist_mutation=0.01,
                  p_point_mutation=0.01,
@@ -258,6 +261,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.p_gs_crossover = p_gs_crossover
         self.p_gs_mutation = p_gs_mutation
         self.semantical_computation = semantical_computation
+        self.special_fitness = special_fitness
         self.p_subtree_mutation = p_subtree_mutation
         self.p_hoist_mutation = p_hoist_mutation
         self.p_point_mutation = p_point_mutation
@@ -271,6 +275,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.verbose = verbose
         self.log = log
         self.random_state = random_state
+
 
     def _verbose_reporter(self, run_details=None):
         """A report of the progress of the evolution process.
@@ -504,6 +509,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         params['function_set'] = self._function_set
         params['arities'] = self._arities
         params['method_probs'] = self._method_probs
+
+        params['special_fitness'] = self.special_fitness
 
         if not self.warm_start or not hasattr(self, '_programs'):
             # Free allocated memory, if any
@@ -920,6 +927,7 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  p_gs_crossover=0.0,
                  p_gs_mutation=0.0,
                  semantical_computation=False,
+                 special_fitness=False,
                  p_subtree_mutation=0.01,
                  p_hoist_mutation=0.01,
                  p_point_mutation=0.01,
@@ -955,6 +963,7 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             p_hoist_mutation=p_hoist_mutation,
             p_point_mutation=p_point_mutation,
             p_point_replace=p_point_replace,
+            special_fitness=special_fitness,
             val_set=val_set,
             max_samples=max_samples,
             feature_names=feature_names,
@@ -1216,6 +1225,7 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
                  p_point_replace=0.05,
                  max_samples=1.0,
                  feature_names=None,
+                 special_fitness=False,
                  warm_start=False,
                  low_memory=False,
                  n_jobs=1,
@@ -1239,6 +1249,7 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
             p_point_mutation=p_point_mutation,
             p_point_replace=p_point_replace,
             max_samples=max_samples,
+            special_fitness=special_fitness,
             feature_names=feature_names,
             warm_start=warm_start,
             low_memory=low_memory,

@@ -26,14 +26,16 @@ with open(file_name, "w") as myfile:
 
 
 models = [
-    ("LinearRegression", 'Linear_Regression()'),
-    ("DecisionTreeRegressor", 'Decision_Tree(criterion="mse")'),
-    ("Gradient_Tree_Boosting","Gradient_Tree_Boosting(verbose=False)"),
-    ("Adaptive_Tree_Boosting",'Adaptive_Tree_Boosting(loss="linear")'),
-    ("Tree_Bagging", "Tree_Bagging(verbose=False)"),
-    ("Random_Tree_Forest", "Random_Tree_Forest(verbose=False)"),
-    ('GS_GP', 'GS_GP(verbose=False , population_size=20)'),
-    ("XGBoost", 'XG_Boost(n_estimators=100)')
+#    ("LinearRegression", 'Linear_Regression()'),
+#    ("DecisionTreeRegressor", 'Decision_Tree(criterion="mse")'),
+#    ("Gradient_Tree_Boosting","Gradient_Tree_Boosting(verbose=False)"),
+#    ("Adaptive_Tree_Boosting",'Adaptive_Tree_Boosting(loss="linear")'),
+#    ("Tree_Bagging", "Tree_Bagging(verbose=False)"),
+#    ("Random_Tree_Forest", "Random_Tree_Forest(verbose=False)"),
+    ('GS_GP', 'GS_GP(verbose=False ,special_fitness=False, population_size=1000)'),
+    ('GS_GP_special_fitness', 'GS_GP(verbose=False ,special_fitness=True, population_size=1000)')
+
+    #    ("XGBoost", 'XG_Boost(n_estimators=100)')
 
 ]
 
@@ -51,7 +53,7 @@ pre_processing_pipelines = [
     ("None", None)
 
 ]
-seed = [0,1]
+seed = list(range(0,25))
 
 export_GS_GP_model = False
 

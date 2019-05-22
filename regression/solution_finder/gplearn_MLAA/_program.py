@@ -134,7 +134,8 @@ class _Program(object):
                  transformer=None,
                  feature_names=None,
                  program=None,
-                 semantical_computation=False):
+                 semantical_computation=False,
+                 special_fitness=False):
 
         self.function_set = function_set
         self.arities = arities
@@ -149,6 +150,7 @@ class _Program(object):
         self.feature_names = feature_names
         self.program = program
         self.semantical_computation = semantical_computation
+        self.special_fitness = special_fitness
 
         if self.program is None:
             # Create a naive random program
@@ -594,7 +596,10 @@ class _Program(object):
             parsimony_coefficient = self.parsimony_coefficient
         penalty = parsimony_coefficient * len(self.program) * self.metric.sign
         #print(penalty / self.raw_fitness_)
-        return self.raw_fitness_ - penalty
+        if self.special_fitness:
+            return self.raw_fitness_ - penalty * self.raw_fitness_
+        else:
+            return self.raw_fitness_ - penalty
 
     def get_subtree(self, random_state, program=None):
         """Get a random subtree from the program.
