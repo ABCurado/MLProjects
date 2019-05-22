@@ -342,6 +342,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.p_gs_crossover = p_gs_crossover
         self.p_gs_mutation = p_gs_mutation
         self.semantical_computation = semantical_computation
+        self.special_fitness = special_fitness,
         self.p_subtree_mutation = p_subtree_mutation
         self.p_hoist_mutation = p_hoist_mutation
         self.p_point_mutation = p_point_mutation
