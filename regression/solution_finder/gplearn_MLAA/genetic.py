@@ -34,7 +34,89 @@ MAX_INT = np.iinfo(np.int32).max
 
 
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
-    pass
+    n_samples, n_features = X[train_indices].shape
+    # Unpack parameters
+    function_set = params['function_set']
+    arities = params['arities']
+    init_depth = params['init_depth']
+    init_method = params['init_method']
+    const_range = params['const_range']
+    metric = params['_metric']
+    transformer = params['_transformer']
+    parsimony_coefficient = params['parsimony_coefficient']
+    p_point_replace = params['p_point_replace']
+    max_samples = params['max_samples']
+    feature_names = params['feature_names']
+
+    # Define the counter for number of better semantic neighbors
+    n_better_semantic_neighbors = 0
+    # Define counter for number of better semantic neighbors with smaller EDV
+    n_better_semantic_neighbors_edv = 0
+    # Compute ED for the elite
+    if elite.semantical_computation:
+        elite._ed = np.std(a=np.abs(np.subtract(elite.program[train_indices], y[train_indices])), ddof=1)
+    else:
+        elite._ed = np.std(a=np.abs(np.subtract(elite.execute(X[train_indices]), y[train_indices])), ddof=1)
+
+    for i in range(n_semantic_neighbors):
+        # Mutate elite by means of GS-M
+        random_state = check_random_state(seeds[i])
+
+        if elite.semantical_computation:
+            program = elite.gs_mutation_tanh_semantics(X, random_state.uniform(), random_state)
+        else:
+            program = elite.gs_mutation_tanh(random_state.uniform(), random_state)
+
+        # Create an instance of _Program, the semantic neighbor
+        program = _Program(function_set=function_set,
+                           arities=arities,
+                           init_depth=init_depth,
+                           init_method=init_method,
+                           n_features=n_features,
+                           metric=metric,
+                           transformer=transformer,
+                           const_range=const_range,
+                           p_point_replace=p_point_replace,
+                           parsimony_coefficient=parsimony_coefficient,
+                           feature_names=feature_names,
+                           random_state=random_state,
+                           program=program,
+                           semantical_computation=elite.semantical_computation)
+
+        # Evaluate the semantic neighbor
+        if sample_weight is None:
+            curr_sample_weight = np.ones((n_samples,))
+        else:
+            curr_sample_weight = sample_weight[train_indices].copy()
+
+        indices, not_indices = program.get_all_indices(n_samples, max_samples, random_state)
+        curr_sample_weight[not_indices] = 0
+
+        if elite.semantical_computation:
+            program.raw_fitness_ = program.metric(y[train_indices], program.program[train_indices], curr_sample_weight)
+        else:
+            program.raw_fitness_ = program.raw_fitness(X[train_indices], y[train_indices], curr_sample_weight)
+
+        # If the neighbour is better than the elite, compare their EDVs
+        if (metric.greater_is_better and (program.raw_fitness_ > elite.raw_fitness_)) or \
+             (not metric.greater_is_better and (program.raw_fitness_ < elite.raw_fitness_)):
+            # Add 1 to better semantic neighbors count
+            n_better_semantic_neighbors += 1
+
+            # Compute ED for the semantic neighbor
+            if elite.semantical_computation:
+                program._ed = np.std(a=np.abs(np.subtract(program.program[train_indices], y[train_indices])), ddof=1)
+            else:
+                program._ed = np.std(a=np.abs(np.subtract(program.execute(X[train_indices]), y[train_indices])), ddof=1)
+
+            if program._ed < elite._ed:
+                # Add 1 to smaller EDV of better semantic neighbors count
+                n_better_semantic_neighbors_edv += 1
+
+    tie = n_better_semantic_neighbors/n_semantic_neighbors
+    edv = n_better_semantic_neighbors_edv/n_better_semantic_neighbors
+
+    return tie, edv
 
 
 def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, val_indices, seeds, params):
@@ -93,8 +175,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'donor_idx': donor_index,
                           'donor_nodes': remains}
             elif method < method_probs[1]:
-                # gs_crossover
-                # Swap crossover
+                # GS-crossover
                 donor, donor_index = _tournament()
                 if semantical_computation:
                     program = parent.gs_crossover_semantics(X, donor, random_state)
@@ -105,7 +186,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'parent_idx': parent_index,
                           'donor_idx': donor_index}
             elif method < method_probs[2]:
-                # gs_mutation
+                # GS mutation
                 if semantical_computation:
                     program = parent.gs_mutation_tanh_semantics(X, method, random_state)
                 else:
@@ -167,12 +248,12 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
         curr_sample_weight[not_indices] = 0
         oob_sample_weight[indices] = 0
 
-        if semantical_computation and program.parents is None:
+        if semantical_computation:
             if program.parents is None:
                 # During initialization, an individual has to be a list of program elements to compute its semantcs
-                program.program = program.execute(X)
                 program.program_length = program.length_
                 program.program_depth = program.depth_
+                program.program = program.execute(X)
             program.raw_fitness_ = program.metric(y[train_indices], program.program[train_indices], curr_sample_weight)
             if val_indices is not None:
                 # Calculate validation fitness
@@ -261,7 +342,6 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.p_gs_crossover = p_gs_crossover
         self.p_gs_mutation = p_gs_mutation
         self.semantical_computation = semantical_computation
-        self.special_fitness = special_fitness
         self.p_subtree_mutation = p_subtree_mutation
         self.p_hoist_mutation = p_hoist_mutation
         self.p_point_mutation = p_point_mutation
@@ -555,7 +635,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             start_time = time()
 
             if gen == 0:
-                parents = None
+                parents = None # conditionally execute EDDA here
             else:
                 parents = self._programs[gen - 1]
 

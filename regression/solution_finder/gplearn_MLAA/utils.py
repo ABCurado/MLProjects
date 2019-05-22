@@ -6,8 +6,8 @@ order to maintain compatibility across different versions of scikit-learn.
 
 """
 
+import math
 import numbers
-
 import numpy as np
 from joblib import cpu_count
 
@@ -103,3 +103,16 @@ def _partition_estimators(n_estimators, n_jobs):
     starts = np.cumsum(n_estimators_per_job)
 
     return n_jobs, n_estimators_per_job.tolist(), [0] + starts.tolist()
+
+
+def random_idx_subset_selection(X, p_features, p_instances, shuffle=True):
+    if shuffle:
+        r_indices = np.random.permutation(X.shape[0])
+        c_indices = np.random.permutation(X.shape[1])
+    else:
+        r_indices = np.arange(0, X.shape[0], 1)
+        c_indices = np.arange(0, X.shape[1], 1)
+
+    r_split = int(math.floor(p_instances * X.shape[0]))
+    c_split = int(math.floor(p_features * X.shape[1]))
+    return r_indices[:r_split], c_indices[:c_split]
