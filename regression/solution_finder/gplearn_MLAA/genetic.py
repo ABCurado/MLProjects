@@ -33,6 +33,162 @@ __all__ = ['SymbolicRegressor', 'SymbolicClassifier', 'SymbolicTransformer']
 MAX_INT = np.iinfo(np.int32).max
 
 
+def _initialize_edda(params, population_size, X, y, sample_weight,
+                     train_indices, val_indices, verbose, logger, random_state, n_jobs):
+    # The population of local elites
+    despeciation_pool = []
+
+    # Prepare output generation for EDDA
+    run_details_ = {"deme": [],
+                    "gp_deme": [],
+                    'generation': [],
+                    'average_length': [],
+                    'average_fitness': [],
+                    'best_length': [],
+                    'best_fitness': [],
+                    'best_val_fitness': [],
+                    'best_oob_fitness': [],
+                    'generation_time': []}
+
+    def _verbose_reporter_edda(run_details=None):
+        """A report of the progress of demes evolution process.
+
+        Parameters
+        ----------
+        run_details : dict
+            Information about demes evolution.
+
+        """
+        if run_details is None:
+            print('              |{:^25}|{:^59}|'.format("Deme Average",
+                                               'Best Individual'))
+            print('-' * 14 + ' ' + '-' * 25 + ' ' + '-' * 59 + ' ' + '-' * 10)
+            line_format = '{:>5} {:>3} {:>4} {:>8} {:>16} {:>8} {:>16} {:>16} {:>16} {:>10}'
+            print(line_format.format("Deme", "GP", 'Gen', 'Length', 'Fitness', 'Length',
+                                     'Fitness', "VAL Fitness", 'OOB Fitness', 'Time Left'))
+
+        else:
+            # Estimate remaining time for run
+            gen = run_details['generation'][-1]
+            generation_time = run_details['generation_time'][-1]
+            remaining_time = (params["edda_params"]["maturation"] - gen - 1) * generation_time
+            if remaining_time > 60:
+                remaining_time = '{0:.2f}m'.format(remaining_time / 60.0)
+            else:
+                remaining_time = '{0:.2f}s'.format(remaining_time)
+
+            val_fitness = 'N/A'
+            line_format = '{:>5d} {:>3d} {:4d} {:8.2f} {:16g} {:8d} {:16g} {:>16} {:>16} {:>10}'
+            if val_indices is not None:
+                val_fitness = run_details['best_val_fitness'][-1]
+                line_format = '{:>5d} {:>3d} {:4d} {:8.2f} {:16g} {:8d} {:16g} {:16g} {:>16} {:>10}'
+
+            oob_fitness = 'N/A'
+            if sample_weight is not None:
+                oob_fitness = run_details['best_oob_fitness'][-1]
+                line_format = '{:>5d} {:>3d} {:4d} {:8.2f} {:16g} {:8d} {:16g} {:16g} {:16g} {:>10}'
+
+            print(line_format.format(run_details['deme'][-1],
+                                     run_details['gp_deme'][-1],
+                                     run_details['generation'][-1],
+                                     run_details['average_length'][-1],
+                                     run_details['average_fitness'][-1],
+                                     run_details['best_length'][-1],
+                                     run_details['best_fitness'][-1],
+                                     val_fitness,
+                                     oob_fitness,
+                                     remaining_time))
+
+    # Print header for EDDA initialization
+    if verbose:
+        _verbose_reporter_edda()
+
+    # Define number of GP and GSGP demes
+    n_gsgp_demes = int(params["edda_params"]["p_gsgp_demes"] * population_size)
+
+    for deme in range(population_size):
+        parents = None
+
+        # Copy algorithm's original parameters
+        params_ = dict(params)
+        if deme < n_gsgp_demes:
+            # GS-GP
+            params_['method_probs'] = np.array([0.0, 0.0, 0.0, 0.0, 1.0 - params["edda_params"]["p_mutation"],
+                                                1.0, params["edda_params"]["gsm_ms"]])
+        else:
+            # Standard-GP
+            params_['method_probs'] = np.array([1.0 - params["edda_params"]["p_mutation"], 1.0, 1.0, 1.0, 1.0, 1.0, 0.0])
+
+        best_program = None
+        for gen in range(params["edda_params"]["maturation"]):
+            start_time = time()
+
+            # Parallel loop
+            n_jobs_, n_programs, starts = _partition_estimators(params["edda_params"]["deme_size"], n_jobs)
+            seeds = random_state.randint(MAX_INT, size=params["edda_params"]["deme_size"])
+
+            population = Parallel(n_jobs=n_jobs_, verbose=int(verbose > 1))(
+                delayed(_parallel_evolve)(n_programs[i],
+                                          parents,
+                                          X,
+                                          y,
+                                          sample_weight,
+                                          train_indices,
+                                          val_indices,
+                                          seeds[starts[i]:starts[i + 1]],
+                                          params_)
+                for i in range(n_jobs))
+
+            # Reduce, maintaining order across different n_jobs
+            parents = list(itertools.chain.from_iterable(population))
+
+            fitness = [program.raw_fitness_ for program in parents]
+            length = [program.length_ for program in parents]
+
+            parsimony_coefficient_ = None
+            if deme >= n_gsgp_demes and params['parsimony_coefficient'] == 'auto':
+                parsimony_coefficient_ = (np.cov(length, fitness)[1, 0] /
+                                         np.var(length))
+            for program in parents:
+                program.fitness_ = program.fitness(parsimony_coefficient_)
+
+            # Record run details
+            if params["_metric"].greater_is_better:
+                best_program = parents[np.argmax(fitness)]
+            else:
+                best_program = parents[np.argmin(fitness)]
+
+            # Store outputs
+            run_details_['deme'].append(deme)
+            run_details_['gp_deme'].append(int(deme >= n_gsgp_demes))
+            run_details_['generation'].append(gen)
+            run_details_['average_length'].append(np.mean(length))
+            run_details_['best_length'].append(best_program.length_)
+            run_details_['average_fitness'].append(np.mean(fitness))
+            run_details_['best_fitness'].append(best_program.raw_fitness_)
+            val_fitness = np.nan
+            if val_indices is not None:
+                val_fitness = best_program.val_fitness_
+            run_details_["best_val_fitness"].append(val_fitness)
+            oob_fitness = np.nan
+            if sample_weight is not None:
+                oob_fitness = best_program.oob_fitness_
+            run_details_['best_oob_fitness'].append(oob_fitness)
+            generation_time = time() - start_time
+            run_details_['generation_time'].append(generation_time)
+
+            if verbose:
+                _verbose_reporter_edda(run_details_)
+
+            if logger is not None:
+                log_event = [detailsList[-1] for detailsList in run_details_.values()]
+                logger.info(','.join(list(map(str, log_event))))
+
+        despeciation_pool.append(best_program)
+
+    return despeciation_pool
+
+
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
     n_samples, n_features = X[train_indices].shape
     # Unpack parameters
@@ -166,7 +322,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
             parent, parent_index = _tournament()
 
             if method < method_probs[0]:
-                # Swap crossover
+                # GP: swap crossover
                 donor, donor_index = _tournament()
                 program, removed, remains = parent.crossover(donor.program, random_state)
                 genome = {'method': 'Crossover',
@@ -175,6 +331,24 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'donor_idx': donor_index,
                           'donor_nodes': remains}
             elif method < method_probs[1]:
+                # GP: subtree mutation
+                program, removed, _ = parent.subtree_mutation(random_state)
+                genome = {'method': 'Subtree Mutation',
+                          'parent_idx': parent_index,
+                          'parent_nodes': removed}
+            elif method < method_probs[2]:
+                # GP: hoist mutation
+                program, removed = parent.hoist_mutation(random_state)
+                genome = {'method': 'Hoist Mutation',
+                          'parent_idx': parent_index,
+                          'parent_nodes': removed}
+            elif method < method_probs[3]:
+                # point_mutation
+                program, mutated = parent.point_mutation(random_state)
+                genome = {'method': 'Point Mutation',
+                          'parent_idx': parent_index,
+                          'parent_nodes': mutated}
+            elif method < method_probs[4]:
                 # GS-crossover
                 donor, donor_index = _tournament()
                 if semantical_computation:
@@ -185,32 +359,19 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                 genome = {'method': 'GS-Crossover',
                           'parent_idx': parent_index,
                           'donor_idx': donor_index}
-            elif method < method_probs[2]:
+            elif method < method_probs[5]:
                 # GS mutation
-                if semantical_computation:
-                    program = parent.gs_mutation_tanh_semantics(X, method, random_state)
+                if method_probs[6] == -1:
+                    gsm_ms = method
                 else:
-                    program = parent.gs_mutation_tanh(method, random_state)
+                    gsm_ms = method_probs[6]
+                if semantical_computation:
+                    program = parent.gs_mutation_tanh_semantics(X, gsm_ms, random_state)
+                else:
+                    program = parent.gs_mutation_tanh(gsm_ms, random_state)
+
                 genome = {'method': 'GS-Mutation',
                           'parent_idx': parent_index}
-            elif method < method_probs[3]:
-                # subtree_mutation
-                program, removed, _ = parent.subtree_mutation(random_state)
-                genome = {'method': 'Subtree Mutation',
-                          'parent_idx': parent_index,
-                          'parent_nodes': removed}
-            elif method < method_probs[4]:
-                # hoist_mutation
-                program, removed = parent.hoist_mutation(random_state)
-                genome = {'method': 'Hoist Mutation',
-                          'parent_idx': parent_index,
-                          'parent_nodes': removed}
-            elif method < method_probs[5]:
-                # point_mutation
-                program, mutated = parent.point_mutation(random_state)
-                genome = {'method': 'Point Mutation',
-                          'parent_idx': parent_index,
-                          'parent_nodes': mutated}
             else:
                 # reproduction
                 program = parent.reproduce()
@@ -299,19 +460,21 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  const_range=(-1., 1.),
                  init_depth=(2, 6),
                  init_method='half and half',
+                 edda_params=None,
                  function_set=('add', 'sub', 'mul', 'div'),
                  transformer=None,
                  metric='mean absolute error',
                  parsimony_coefficient=0.001,
                  p_crossover=0.9,
-                 p_gs_crossover=0.0,
-                 p_gs_mutation=0.0,
-                 semantical_computation=False,
                  special_fitness=False,
                  p_subtree_mutation=0.01,
                  p_hoist_mutation=0.01,
                  p_point_mutation=0.01,
                  p_point_replace=0.05,
+                 p_gs_crossover=0.0,
+                 p_gs_mutation=0.0,
+                 gsm_ms=-1.0,
+                 semantical_computation=False,
                  val_set=0.0,
                  max_samples=1.0,
                  feature_names=None,
@@ -334,19 +497,21 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.const_range = const_range
         self.init_depth = init_depth
         self.init_method = init_method
+        self.edda_params = edda_params
         self.function_set = function_set
         self.transformer = transformer
         self.metric = metric
         self.parsimony_coefficient = parsimony_coefficient
         self.p_crossover = p_crossover
-        self.p_gs_crossover = p_gs_crossover
-        self.p_gs_mutation = p_gs_mutation
-        self.semantical_computation = semantical_computation
         self.special_fitness = special_fitness,
         self.p_subtree_mutation = p_subtree_mutation
         self.p_hoist_mutation = p_hoist_mutation
         self.p_point_mutation = p_point_mutation
         self.p_point_replace = p_point_replace
+        self.p_gs_crossover = p_gs_crossover
+        self.p_gs_mutation = p_gs_mutation
+        self.gsm_ms = gsm_ms
+        self.semantical_computation = semantical_computation
         self.val_set = val_set
         self.max_samples = max_samples
         self.feature_names = feature_names
@@ -356,7 +521,6 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.verbose = verbose
         self.log = log
         self.random_state = random_state
-
 
     def _verbose_reporter(self, run_details=None):
         """A report of the progress of the evolution process.
@@ -510,32 +674,42 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                 raise ValueError('Unsupported metric: %s' % self.metric)
             self._metric = _fitness_map[self.metric]
 
+        # Parameters for standard GP operators
         self._method_probs = np.array([self.p_crossover,
-                                       self.p_gs_crossover,
-                                       self.p_gs_mutation,
                                        self.p_subtree_mutation,
                                        self.p_hoist_mutation,
                                        self.p_point_mutation])
         self._method_probs = np.cumsum(self._method_probs)
 
-        if self._method_probs[-1] > 1 and not self.semantical_computation:
-            raise ValueError('The sum of p_crossover, p_gs_crossover, p_gs_mutation, p_subtree_mutation, '
-                             'p_hoist_mutation and p_point_mutation should '
-                             'total to 1.0 or less.')
+        if self._method_probs[-1] < 0.0 or self._method_probs[-1] > 1.0:
+            raise ValueError('The sum of p_crossover, p_subtree_mutation, p_hoist_mutation '
+                             'and p_point_mutation must be in [0.0, 1.0]')
 
-        if self.semantical_computation and (self.p_gs_crossover + self.p_gs_mutation) != 1.0:
-            raise ValueError('The sum of p_gs_crossover and p_gs_mutation should be equal to 1.0')
+        # Parameters for GS operators
+        _gs_method_probs = self.p_gs_crossover + self.p_gs_mutation
 
+        if _gs_method_probs > 0.0 and self._method_probs[-1] > 0.0:
+            raise ValueError('The user must to choose between standard GP and GS-GP operators.')
+
+        if _gs_method_probs != 1.0:
+            raise ValueError('The sum of p_gs_crossover and p_gs_mutation must be equal to 1.0')
+
+        self._method_probs = np.append(self._method_probs, np.array([self.p_gs_crossover, _gs_method_probs, self.gsm_ms]))
+
+        # Parameters for semantic stopping criteria
         if 0.0 < self.tie_stopping_criteria <= 1 and 0 < self.edv_stopping_criteria <= 1.0:
             raise ValueError('Only one semantic stopping criteria is allowed: TIE or EDV. '
-                             'Got TIE={0:.2f} EDV={1:.2f}'.format(self.tie_stopping_criteria,
+                             'Got TIE={0:.2f} EDV={1:.2f}.'.format(self.tie_stopping_criteria,
                                                                     self.edv_stopping_criteria))
+
         if 0.0 > self.tie_stopping_criteria or self.tie_stopping_criteria > 1.0:
             raise ValueError('TIE semantic stopping criteria should be between 0 and 1. Given {:.2f}'.format(
                 self.tie_stopping_criteria))
+
         if 0.0 > self.edv_stopping_criteria or self.edv_stopping_criteria > 1.0:
             raise ValueError('EDV semantic stopping criteria should be between 0 and 1. Given {:.2f}'.format(
                 self.EDV_stopping_criteria))
+
         if (0.0 < self.tie_stopping_criteria <= 1 or 0 < self.edv_stopping_criteria <= 1.0) and \
                 self.n_semantic_neighbors<=0:
             raise ValueError('The number of semantic neighbors must be an integer value higher than 0. '
@@ -605,6 +779,11 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                                  'best_oob_fitness': [],
                                  'generation_time': []}
 
+            if self.edda_params is not None:
+                # Adjust the log file for EDDA
+                self.run_details_["deme"] = []
+                self.run_details_["gp_deme"] = []
+
         prior_generations = len(self._programs)
         n_more_generations = self.generations - prior_generations
 
@@ -623,20 +802,28 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             for i in range(len(self._programs)):
                 _ = random_state.randint(MAX_INT, size=self.population_size)
 
-        if self.verbose:
-            # Print header fields
-            self._verbose_reporter()
-
         if self.log:
             log_event = [self.random_state]
             logger = logging.getLogger(','.join(list(map(str, log_event))))
+        else:
+            logger = None
 
         for gen in range(prior_generations, self.generations):
 
             start_time = time()
 
             if gen == 0:
-                parents = None # conditionally execute EDDA here
+                if self.edda_params is not None:
+                    # Use EDDA initialization
+                    parents = _initialize_edda(params, self.population_size, X, y, sample_weight, train_indices,
+                                               val_indices, self.verbose, logger, random_state, self.n_jobs)
+                else:
+                    # Use standard initialization
+                    parents = None
+
+                if self.verbose:
+                    # Print header fields for MEP
+                    self._verbose_reporter()
             else:
                 parents = self._programs[gen - 1]
 
@@ -718,6 +905,9 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                           "as EDV ({1:.2f}) < {2:.2f} threshold".format(gen, edv_, self.edv_stopping_criteria))
                     break
 
+            if self.edda_params is not None:
+                self.run_details_['deme'].append("-1")
+                self.run_details_['gp_deme'].append("-1")
             self.run_details_['generation'].append(gen)
             self.run_details_['average_length'].append(np.mean(length))
             self.run_details_['average_fitness'].append(np.mean(fitness))
@@ -1001,18 +1191,20 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  const_range=(-1., 1.),
                  init_depth=(2, 6),
                  init_method='half and half',
+                 edda_params=None,
                  function_set=('add', 'sub', 'mul', 'div'),
                  metric='mean absolute error',
                  parsimony_coefficient=0.001,
                  p_crossover=0.9,
-                 p_gs_crossover=0.0,
-                 p_gs_mutation=0.0,
-                 semantical_computation=False,
                  special_fitness=False,
                  p_subtree_mutation=0.01,
                  p_hoist_mutation=0.01,
                  p_point_mutation=0.01,
                  p_point_replace=0.05,
+                 p_gs_crossover=0.0,
+                 p_gs_mutation=0.0,
+                 gsm_ms=-1.0,
+                 semantical_computation=False,
                  val_set=0.0,
                  max_samples=1.0,
                  feature_names=None,
@@ -1033,18 +1225,19 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             const_range=const_range,
             init_depth=init_depth,
             init_method=init_method,
+            edda_params=edda_params,
             function_set=function_set,
             metric=metric,
             parsimony_coefficient=parsimony_coefficient,
             p_crossover=p_crossover,
-            p_gs_crossover=p_gs_crossover,
-            p_gs_mutation=p_gs_mutation,
-            semantical_computation=semantical_computation,
             p_subtree_mutation=p_subtree_mutation,
             p_hoist_mutation=p_hoist_mutation,
             p_point_mutation=p_point_mutation,
             p_point_replace=p_point_replace,
             special_fitness=special_fitness,
+            p_gs_mutation=p_gs_mutation,
+            gsm_ms=gsm_ms,
+            semantical_computation=semantical_computation,
             val_set=val_set,
             max_samples=max_samples,
             feature_names=feature_names,
