@@ -294,6 +294,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     feature_names = params['feature_names']
     semantical_computation = params["semantical_computation"]
     special_fitness = params['special_fitness']
+    selection_method = params['selection_method']
 
     max_samples = int(max_samples * n_samples)
 
@@ -307,6 +308,39 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
             parent_index = contenders[np.argmin(fitness)]
         return parents[parent_index], parent_index
 
+    def _roulette():
+        """Chooses random individual with a fitness-based probability"""
+        roulette_idx = [index for index in range(len(parents))]
+        fitness = [parents[p].fitness_ for p in roulette_idx]
+        sum_fit  = sum(fitness)
+
+        if metric.greater_is_better:
+            probs = [val / sum_fit for val in fitness]
+            parent_index = random_state.choice(roulette_idx, p=probs)
+        else:
+            fitness_inv = [sum_fit-val for val in fitness]
+            sum_fit_inv = sum(fitness_inv)
+            probs_inv = [val/sum_fit_inv for val in fitness_inv]
+            parent_index = random_state.choice(roulette_idx, p=probs_inv)
+        return parents[parent_index], parent_index
+
+
+    def _rank():
+        """Chooses random individual with a rank-based probability"""
+        rank_idx = [index for index in range(len(parents))]
+        fitness = [parents[p].fitness_ for p in rank_idx]
+        ranks = rankdata(fitness)
+        sum_ranks = sum(ranks)
+        probs = [val/sum_ranks for val in ranks]
+
+        if metric.greater_is_better:
+            ## the ranks need to be inverted before this one works
+            parent_index = random_state.choice(rank_idx, p=probs)
+        else:
+            parent_index = random_state.choice(rank_idx, p=probs)
+        return parents[parent_index], parent_index
+
+
     # Build programs
     programs = []
 
@@ -319,7 +353,12 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
             genome = None
         else:
             method = random_state.uniform()
-            parent, parent_index = _tournament()
+            if selection_method == "tournament":
+                parent, parent_index = _tournament()
+            elif selection_method == "roulette":
+                parent, parent_index = _roulette()
+            elif selection_method == "rank":
+                parent, parent_index = _rank()
 
             if method < method_probs[0]:
                 # GP: swap crossover
@@ -483,7 +522,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  n_jobs=1,
                  verbose=0,
                  log=False,
-                 random_state=None):
+                 random_state=None,
+                 selection_method="tournament"):
 
         self.population_size = population_size
         self.hall_of_fame = hall_of_fame
@@ -521,6 +561,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.verbose = verbose
         self.log = log
         self.random_state = random_state
+        self.selection_method= selection_method
 
     def _verbose_reporter(self, run_details=None):
         """A report of the progress of the evolution process.
@@ -691,8 +732,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         if _gs_method_probs > 0.0 and self._method_probs[-1] > 0.0:
             raise ValueError('The user must to choose between standard GP and GS-GP operators.')
 
-        if _gs_method_probs != 1.0:
-            raise ValueError('The sum of p_gs_crossover and p_gs_mutation must be equal to 1.0')
+#        if _gs_method_probs != 1.0:
+#           raise ValueError('The sum of p_gs_crossover and p_gs_mutation must be equal to 1.0')
 
         self._method_probs = np.append(self._method_probs, np.array([self.p_gs_crossover, _gs_method_probs, self.gsm_ms]))
 
@@ -1213,7 +1254,8 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  n_jobs=1,
                  verbose=0,
                  log=False,
-                 random_state=None):
+                 random_state=None,
+                 selection_method="tournament"):
         super(SymbolicRegressor, self).__init__(
             population_size=population_size,
             generations=generations,
@@ -1246,7 +1288,8 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             n_jobs=n_jobs,
             verbose=verbose,
             log=log,
-            random_state=random_state)
+            random_state=random_state,
+            selection_method=selection_method)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""
