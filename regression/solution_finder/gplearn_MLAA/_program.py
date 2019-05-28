@@ -135,7 +135,9 @@ class _Program(object):
                  feature_names=None,
                  program=None,
                  semantical_computation=False,
-                 special_fitness=False):
+                 special_fitness=False,
+                 terminal_probs = None,
+                 function_probs = None):
 
         self.function_set = function_set
         self.arities = arities
@@ -151,6 +153,8 @@ class _Program(object):
         self.program = program
         self.semantical_computation = semantical_computation
         self.special_fitness = special_fitness
+        self.terminal_probs = terminal_probs
+        self.function_probs = function_probs
 
         if self.program is None:
             # Create a naive random program
@@ -791,9 +795,15 @@ class _Program(object):
             if isinstance(program[node], _Function):
                 arity = program[node].arity
                 # Find a valid replacement with same arity
-                replacement = len(self.arities[arity])
-                replacement = random_state.randint(replacement)
-                replacement = self.arities[arity][replacement]
+                if self.function_probs is not None:
+                    funcs = [func for func in self.function_probs
+                             if func[0].arity == arity]
+                    replacement = random_state.choice([func[0] for func in funcs], p=[func[1] for func in funcs])
+                else:
+                    replacement = len(self.arities[arity])
+                    replacement = random_state.randint(replacement)
+                    replacement = self.arities[arity][replacement]
+
                 program[node] = replacement
             else:
                 # We've got a terminal, add a const or variable
@@ -810,6 +820,14 @@ class _Program(object):
                 program[node] = terminal
 
         return program, list(mutate)
+
+
+    def set_function_probs(self, function_set):
+        #unpack function names and arity
+        function_names = [function_set[i] for i in range(len(function_set))]
+
+        #set equal probs for all functions
+        self.function_probs =  [(func, 1/len(function_names)) for func in function_names]
 
     depth_ = property(_depth)
     length_ = property(_length)

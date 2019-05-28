@@ -295,6 +295,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     semantical_computation = params["semantical_computation"]
     special_fitness = params['special_fitness']
     selection_method = params['selection_method']
+    function_probs = params["function_probs"]
 
     max_samples = int(max_samples * n_samples)
 
@@ -347,6 +348,13 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     for i in range(n_programs):
 
         random_state = check_random_state(seeds[i])
+
+        # initialize probs for funcs and terminals
+        if function_probs == True:
+            program.set_function_probs(function_set)
+        #adjust probs
+        elif (function_probs is not None or function_probs is not True):
+            pass
 
         if parents is None:
             program = None
@@ -433,6 +441,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                            program=program,
                            semantical_computation=semantical_computation,
                            special_fitness=special_fitness)
+
 
         program.parents = genome
 
@@ -523,7 +532,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  verbose=0,
                  log=False,
                  random_state=None,
-                 selection_method="tournament"):
+                 selection_method="tournament",
+                 function_probs=False):
 
         self.population_size = population_size
         self.hall_of_fame = hall_of_fame
@@ -562,6 +572,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.log = log
         self.random_state = random_state
         self.selection_method= selection_method
+        self.function_probs = function_probs
 
     def _verbose_reporter(self, run_details=None):
         """A report of the progress of the evolution process.
@@ -1255,7 +1266,9 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  verbose=0,
                  log=False,
                  random_state=None,
-                 selection_method="tournament"):
+                 selection_method="tournament",
+                 function_probs=False):
+
         super(SymbolicRegressor, self).__init__(
             population_size=population_size,
             generations=generations,
@@ -1289,7 +1302,8 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             verbose=verbose,
             log=log,
             random_state=random_state,
-            selection_method=selection_method)
+            selection_method=selection_method,
+            function_probs=function_probs)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""
