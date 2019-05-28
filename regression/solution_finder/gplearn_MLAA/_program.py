@@ -766,7 +766,7 @@ class _Program(object):
                        set(range(start + sub_start, start + sub_end)))
         return self.program[:start] + hoist + self.program[end:], removed
 
-    def point_mutation(self, random_state):
+    def point_mutation(self, random_state, func_probs=None):
         """Perform the point mutation operation on the program.
 
         Point mutation selects random nodes from the embedded program to be
@@ -795,10 +795,11 @@ class _Program(object):
             if isinstance(program[node], _Function):
                 arity = program[node].arity
                 # Find a valid replacement with same arity
-                if self.function_probs is not None:
-                    funcs = [func for func in self.function_probs
+                if func_probs is not None:
+                    funcs = [func for func in func_probs
                              if func[0].arity == arity]
                     replacement = random_state.choice([func[0] for func in funcs], p=[func[1] for func in funcs])
+
                 else:
                     replacement = len(self.arities[arity])
                     replacement = random_state.randint(replacement)

@@ -188,6 +188,15 @@ def _initialize_edda(params, population_size, X, y, sample_weight,
 
     return despeciation_pool
 
+def _initialize_glob_probs(function_set):
+    # unpack function names and arity
+    function_names = [function_set[i] for i in range(len(function_set))]
+
+    # set equal probs for all functions
+    return [(func, 1 / len(function_names)) for func in function_names]
+
+def _update_glob_probs(func_probs, replacement):
+    pass
 
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
     n_samples, n_features = X[train_indices].shape
@@ -275,7 +284,7 @@ def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_we
     return tie, edv
 
 
-def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, val_indices, seeds, params):
+def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, val_indices, seeds, params, function_probs):
     """Private function used to build a batch of programs within a job."""
     n_samples, n_features = X[train_indices].shape
     # Unpack parameters
@@ -295,7 +304,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     semantical_computation = params["semantical_computation"]
     special_fitness = params['special_fitness']
     selection_method = params['selection_method']
-    function_probs = params["function_probs"]
+    function_probs = function_probs
 
     max_samples = int(max_samples * n_samples)
 
@@ -349,12 +358,12 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
 
         random_state = check_random_state(seeds[i])
 
-        # initialize probs for funcs and terminals
-        if function_probs == True:
-            program.set_function_probs(function_set)
+        # initialize probs for funcs and terminals !!!! -> Now done on a global level
+#        if function_probs == True:
+#            program.set_function_probs(function_set)
         #adjust probs
-        elif (function_probs is not None or function_probs is not True):
-            pass
+#        elif (function_probs is not None or function_probs is not True):
+ #           pass
 
         if parents is None:
             program = None
@@ -391,7 +400,8 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'parent_nodes': removed}
             elif method < method_probs[3]:
                 # point_mutation
-                program, mutated = parent.point_mutation(random_state)
+                program, mutated = parent.point_mutation(random_state, function_probs)
+#                function_probs = _update_glob_probs(function_probs, replacement)
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
@@ -441,7 +451,6 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                            program=program,
                            semantical_computation=semantical_computation,
                            special_fitness=special_fitness)
-
 
         program.parents = genome
 
@@ -860,6 +869,9 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         else:
             logger = None
 
+        # set up the probs initialization up here
+        func_probs = _initialize_glob_probs(self._function_set)
+
         for gen in range(prior_generations, self.generations):
 
             start_time = time()
@@ -892,7 +904,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                                           train_indices,
                                           val_indices,
                                           seeds[starts[i]:starts[i + 1]],
-                                          params)
+                                          params,
+                                          func_probs)
                 for i in range(n_jobs))
 
             # Reduce, maintaining order across different n_jobs

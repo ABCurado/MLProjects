@@ -109,17 +109,15 @@ def algo_run(model, pre_processing_pipeline, scaler, sampler, seed):
         model_eval = model[1]
 
     model_eval = eval(model_eval)
-    try:
-        y_predicted = utils.cross_validation_average_results(
+
+    y_predicted = utils.cross_validation_average_results(
             model_eval, X, y, n_splits=5,
             scaler=scaler[1],
             sampling_technique=sampler[1]
         )
-        mean_s_error = utils.calculate_mean_absolute_error(y_predicted, y)
-        explained_variance = utils.calculate_explained_variance_score(y_predicted, y)
-    except:
-        mean_s_error = -1
-        explained_variance = -1
+    mean_s_error = utils.calculate_mean_absolute_error(y_predicted, y)
+    explained_variance = utils.calculate_explained_variance_score(y_predicted, y)
+
 
     time_elapsed = datetime.datetime.now() - start_time
 
