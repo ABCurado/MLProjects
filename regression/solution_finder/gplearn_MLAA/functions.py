@@ -44,6 +44,10 @@ class _Function(object):
     def __call__(self, *args):
         return self.function(*args)
 
+    def __str__(self):
+        return self.name
+
+    __repr__ = __str__
 
 def make_function(function, name, arity):
     """Make a function node, a representation of a mathematical relationship.
