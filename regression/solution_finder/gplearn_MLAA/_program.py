@@ -790,7 +790,7 @@ class _Program(object):
         # Get the nodes to modify
         mutate = np.where(random_state.uniform(size=len(program)) <
                           self.p_point_replace)[0]
-
+        operator = None
         for node in mutate:
             if isinstance(program[node], _Function):
                 arity = program[node].arity
@@ -806,6 +806,7 @@ class _Program(object):
                     replacement = self.arities[arity][replacement]
 
                 program[node] = replacement
+                operator = replacement
             else:
                 # We've got a terminal, add a const or variable
                 if self.const_range is not None:
@@ -819,8 +820,9 @@ class _Program(object):
                         raise ValueError('A constant was produced with '
                                          'const_range=None.')
                 program[node] = terminal
+                operator = terminal
 
-        return program, list(mutate)
+        return program, list(mutate), operator
 
 
     def set_function_probs(self, function_set):

@@ -45,4 +45,6 @@ geckodriver.log
 
 Proposal/Debugging\.py
 
+regression/log_files/
+
 regression/solution_finder/gplearn_MLAA/test\.py

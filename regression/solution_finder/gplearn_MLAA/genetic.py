@@ -196,7 +196,18 @@ def _initialize_glob_probs(function_set):
     return [(func, 1 / len(function_names)) for func in function_names]
 
 def _update_glob_probs(func_probs, replacement):
-    pass
+    updated_probs = []
+    #naive approach ---------------> Issue to be solved: No negative values, no probs below a certain threshold
+    if type(replacement) == int:
+        # case if it is a terminal
+        updated_probs = func_probs
+    else:
+        for i in func_probs:
+            if i[0] == replacement:
+                updated_probs.append((i[0], i[1] - 0.01))
+            else:
+                updated_probs.append((i[0], i[1] + 0.01/(len(func_probs)-1)))
+    return updated_probs
 
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
     n_samples, n_features = X[train_indices].shape
@@ -410,8 +421,9 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                 #function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
 
                 # point_mutation
-                program, mutated = parent.point_mutation(random_state, function_probs)
-#                function_probs = _update_glob_probs(function_probs, replacement)
+                program, mutated, replacement = parent.point_mutation(random_state, function_probs)
+                if replacement is not None:
+                    function_probs = _update_glob_probs(function_probs, replacement)
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
@@ -918,6 +930,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         for gen in range(prior_generations, self.generations):
 
             start_time = time()
+            print(func_probs)
 
             if gen == 0:
                 if self.edda_params is not None:
