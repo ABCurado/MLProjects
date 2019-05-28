@@ -44,3 +44,5 @@ geckodriver.log
 
 
 Proposal/Debugging\.py
+
+regression/log_files/
