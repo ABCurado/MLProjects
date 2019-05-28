@@ -368,6 +368,8 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
         if parents is None:
             program = None
             genome = None
+            original = program
+
         else:
             method = random_state.uniform()
             if selection_method == "tournament":
@@ -376,6 +378,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                 parent, parent_index = _roulette()
             elif selection_method == "rank":
                 parent, parent_index = _rank()
+            original = parent
 
             if method < method_probs[0]:
                 # GP: swap crossover
@@ -386,12 +389,14 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'parent_nodes': removed,
                           'donor_idx': donor_index,
                           'donor_nodes': remains}
+
             elif method < method_probs[1]:
                 # GP: subtree mutation
                 program, removed, _ = parent.subtree_mutation(random_state)
                 genome = {'method': 'Subtree Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': removed}
+
             elif method < method_probs[2]:
                 # GP: hoist mutation
                 program, removed = parent.hoist_mutation(random_state)
@@ -399,12 +404,18 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'parent_idx': parent_index,
                           'parent_nodes': removed}
             elif method < method_probs[3]:
+
+                #operator_weights, donor_weights = calculate_genotype_inverted_weights(programs, function_set,
+                #                                                                      feature_names)
+                #function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
+
                 # point_mutation
                 program, mutated = parent.point_mutation(random_state, function_probs)
 #                function_probs = _update_glob_probs(function_probs, replacement)
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
+
             elif method < method_probs[4]:
                 # GS-crossover
                 donor, donor_index = _tournament()
@@ -491,8 +502,40 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
 
         programs.append(program)
 
+
     return programs
 
+def calculate_genotype_inverted_weights(programs, function_set, feature_names):
+
+    operators = {operator:0 for operator in function_set }
+    features = {donor:0 for donor in range(0,len(feature_names)+1)}
+
+    for program in programs:
+        for node in  program.program:
+            if node in operators:
+                operators[node] += 1
+            if node in features:
+                features[node] += 1
+            else:
+                features[len(features)-1] += 1
+
+
+    operators = {k: 1 / operators[k] if operators[k] else 0.0 for k in operators.keys()}
+    features = {k:  1 / features[k] if features[k] else 0.0 for k in features.keys()}
+    total_operators = sum(operators.values())
+    if total_operators != 0:
+        operators = {k: operators[k] / total_operators  for k in operators.keys()}
+    else:
+        operators = {k: 1 / len(operators)  for k in operators.keys()}
+
+    total_features = sum(features.values())
+    if total_features != 0:
+        features = {k: features[k] / total_features for k in features.keys()}
+    else:
+        features = {k: 1 / len(features)  for k in features.keys()}
+
+
+    return list(operators.values()), list(features.values())
 
 class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
 
