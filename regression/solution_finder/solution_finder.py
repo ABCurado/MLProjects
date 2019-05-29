@@ -39,7 +39,7 @@ models = [
  #   ("XGBoost", 'XG_Boost(n_estimators=100)')
 ]
 
-seed = list(range(0,1))
+seed = list(range(0,5))
 
 export_GS_GP_model = False
 

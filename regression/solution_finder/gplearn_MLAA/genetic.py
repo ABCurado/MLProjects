@@ -209,6 +209,60 @@ def _update_glob_probs(func_probs, replacement):
                 updated_probs.append((i[0], i[1] + 0.01/(len(func_probs)-1)))
     return updated_probs
 
+def _validate_glob_probs(func_probs):
+    """Checks if all probs sum to 1 and that some probs do not fall below a threshold"""
+    threshold = 0.2
+    probs = [i[1] for i in func_probs]
+    if sum(probs) != 1 or min(probs) < threshold:
+        # set all probs below threshold to threshold
+        probs_new = [i if i>= threshold else threshold for i in probs]
+
+        # check the max threshold
+        probs_new = [i if i <= 1-((len(func_probs)-1) * threshold) else 1-((len(func_probs)-1) * threshold)
+                     for i in probs]
+
+        # "normalize" to set the sum of all weights to 1
+        probs_new = [i/sum(probs_new) for i in probs_new]
+         # here's a "bug", the prob could fall below the threshold again but never to 0. Could be neglected for now
+
+        probs_new = [(func_probs[i][0], probs_new[i]) for i in range(len(func_probs))]
+    else:
+        probs_new = func_probs
+
+    return probs_new
+
+def calculate_genotype_inverted_weights(programs, function_set, feature_names):
+
+    operators = {operator:0 for operator in function_set }
+    features = {donor:0 for donor in range(0,len(feature_names)+1)}
+
+    for program in programs:
+        for node in  program.program:
+            if node in operators:
+                operators[node] += 1
+            if node in features:
+                features[node] += 1
+            else:
+                features[len(features)-1] += 1
+
+
+    operators = {k: 1 / operators[k] if operators[k] else 0.0 for k in operators.keys()}
+    features = {k:  1 / features[k] if features[k] else 0.0 for k in features.keys()}
+    total_operators = sum(operators.values())
+    if total_operators != 0:
+        operators = {k: operators[k] / total_operators  for k in operators.keys()}
+    else:
+        operators = {k: 1 / len(operators)  for k in operators.keys()}
+
+    total_features = sum(features.values())
+    if total_features != 0:
+        features = {k: features[k] / total_features for k in features.keys()}
+    else:
+        features = {k: 1 / len(features)  for k in features.keys()}
+
+
+    return list(operators.values()), list(features.values())
+
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
     n_samples, n_features = X[train_indices].shape
     # Unpack parameters
@@ -428,6 +482,10 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                                                                                           feature_names)
                     function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
 
+                    #validate probs
+                    function_probs = _validate_glob_probs(function_probs)
+                    if i%10 ==0:
+                        print(function_probs)
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
@@ -520,38 +578,6 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
 
 
     return (programs, function_probs)
-
-def calculate_genotype_inverted_weights(programs, function_set, feature_names):
-
-    operators = {operator:0 for operator in function_set }
-    features = {donor:0 for donor in range(0,len(feature_names)+1)}
-
-    for program in programs:
-        for node in  program.program:
-            if node in operators:
-                operators[node] += 1
-            if node in features:
-                features[node] += 1
-            else:
-                features[len(features)-1] += 1
-
-
-    operators = {k: 1 / operators[k] if operators[k] else 0.0 for k in operators.keys()}
-    features = {k:  1 / features[k] if features[k] else 0.0 for k in features.keys()}
-    total_operators = sum(operators.values())
-    if total_operators != 0:
-        operators = {k: operators[k] / total_operators  for k in operators.keys()}
-    else:
-        operators = {k: 1 / len(operators)  for k in operators.keys()}
-
-    total_features = sum(features.values())
-    if total_features != 0:
-        features = {k: features[k] / total_features for k in features.keys()}
-    else:
-        features = {k: 1 / len(features)  for k in features.keys()}
-
-
-    return list(operators.values()), list(features.values())
 
 class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
 
