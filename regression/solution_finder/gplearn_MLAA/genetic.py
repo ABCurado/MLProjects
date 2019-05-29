@@ -483,10 +483,10 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                                                                                           feature_names)
                     function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
 
-                    #validate probs
-                    function_probs = _validate_glob_probs(function_probs)
-                    if i%10 ==0:
-                        print(function_probs)
+                #validate probs
+                function_probs = _validate_glob_probs(function_probs)
+                if i%10 ==0:
+                    print(function_probs)
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
