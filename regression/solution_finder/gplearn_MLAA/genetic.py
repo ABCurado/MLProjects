@@ -27,7 +27,7 @@ from .fitness import _fitness_map, _Fitness
 from .functions import _function_map, _Function, sig1 as sigmoid
 from .utils import _partition_estimators
 from .utils import check_random_state, NotFittedError
-
+import datetime
 __all__ = ['SymbolicRegressor', 'SymbolicClassifier', 'SymbolicTransformer']
 
 MAX_INT = np.iinfo(np.int32).max
@@ -519,7 +519,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
         programs.append(program)
 
 
-    return programs
+    return (programs, function_probs)
 
 def calculate_genotype_inverted_weights(programs, function_set, feature_names):
 
@@ -624,7 +624,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.metric = metric
         self.parsimony_coefficient = parsimony_coefficient
         self.p_crossover = p_crossover
-        self.special_fitness = special_fitness,
+        self.special_fitness = special_fitness
         self.p_subtree_mutation = p_subtree_mutation
         self.p_hoist_mutation = p_hoist_mutation
         self.p_point_mutation = p_point_mutation
@@ -941,6 +941,11 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         else:
             func_probs = None
 
+        file_name = "../log_files/" + "operator_probs_" + str(datetime.datetime.now().hour) + \
+                    "_" + str(datetime.datetime.now().minute) + "_log.csv"
+        header_string = str(self._function_set)
+        with open(file_name, "w") as myfile:
+            myfile.write(header_string + "\n")
 
         for gen in range(prior_generations, self.generations):
 
@@ -964,8 +969,9 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             # Parallel loop
             n_jobs, n_programs, starts = _partition_estimators(self.population_size, self.n_jobs)
             seeds = random_state.randint(MAX_INT, size=self.population_size)
+            print(func_probs)
 
-            population = Parallel(n_jobs=n_jobs, verbose=int(self.verbose > 1))(
+            results = Parallel(n_jobs=self.n_jobs, verbose=int(self.verbose > 1))(
                 delayed(_parallel_evolve)(n_programs[i],
                                           parents,
                                           X,
@@ -978,8 +984,17 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                                           func_probs)
                 for i in range(n_jobs))
 
-            # Reduce, maintaining order across different n_jobs
-            population = list(itertools.chain.from_iterable(population))
+            population = []
+            new_func_probs = []
+
+            for result in results:
+                for element in result[0]:
+                    population.append(element)
+                new_func_probs.append(result[1])
+            func_probs = new_func_probs[0]
+            with open(file_name, "a") as myfile:
+                myfile.write(','.join([str(operator[1]) for operator in func_probs]) + "\n")
+
 
             fitness = [program.raw_fitness_ for program in population]
             length = [program.length_ for program in population]

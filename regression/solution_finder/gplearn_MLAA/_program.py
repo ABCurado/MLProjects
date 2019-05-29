@@ -599,7 +599,7 @@ class _Program(object):
         if parsimony_coefficient is None:
             parsimony_coefficient = self.parsimony_coefficient
         penalty = parsimony_coefficient * len(self.program) * self.metric.sign
-        #print(penalty / self.raw_fitness_)
+
         if self.special_fitness:
             return self.raw_fitness_ - penalty * self.raw_fitness_
         else:

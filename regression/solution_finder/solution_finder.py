@@ -32,17 +32,18 @@ models = [
     #    ("Adaptive_Tree_Boosting",'Adaptive_Tree_Boosting(loss="linear")'),
     #    ("Tree_Bagging", "Tree_Bagging(verbose=False)"),
     #    ("Random_Tree_Forest", "Random_Tree_Forest(verbose=False)"),
-    ('GS_GP', 'GS_GP(verbose=False ,special_fitness=False, population_size=1000)'),
-    ('GS_GP', 'GS_GP(verbose=False ,probabilistic_genotype_operators=True, population_size=1000)'),
-    ('GS_GP_special_fitness', 'GS_GP(verbose=False ,special_fitness=True, population_size=1000)'),
-    ("XGBoost", 'XG_Boost(n_estimators=100)')
+    #('GS_GP', 'GS_GP(verbose=False ,special_fitness=False, generations=50)'),
+    ('GS_GP_genotype_operators', 'GS_GP(verbose=False ,probabilistic_genotype_operators=True, generations=50)'),
+ #   ('GS_GP_phenotype_operators', 'GS_GP(verbose=False ,probabilistic_phenotype_operators=True, generations=50)'),
+    #('GS_GP_special_fitness', 'GS_GP(verbose=False ,special_fitness=True, generations=50)'),
+ #   ("XGBoost", 'XG_Boost(n_estimators=100)')
 ]
 
 seed = list(range(0,1))
 
 export_GS_GP_model = False
 
-def algo_run(model, seed):
+def algo_run(seed, model):
 
     start_time = datetime.datetime.now()
 
@@ -71,9 +72,9 @@ def algo_run(model, seed):
     with open(file_name, "a") as myfile:
         myfile.write(result_string + "\n")
 
-    print(model[0]+": "+str(mean_s_error))
+    print(str(seed)+" " + model[0]+": "+str(mean_s_error))
 
-    if 'GS_GP' in model[1]:
+    if 'GS_GP' in model[1] and False:
         idx = model_eval._program.parents['parent_idx']
         fade_nodes = model_eval._program.parents['parent_nodes']
         print(model_eval._programs[-2][idx])
@@ -94,7 +95,7 @@ def add_seed(model, seed,X):
 
 
 if __name__ ==  '__main__':
-    possible_values = list(itertools.product(*[models, seed]))
+    possible_values = list(itertools.product(*[seed, models]))
 
     core_count = multiprocessing.cpu_count()
     #print("All possible combinations generated:")
