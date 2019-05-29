@@ -212,15 +212,16 @@ def _update_glob_probs(func_probs, replacement):
 
 def _validate_glob_probs(func_probs):
     """Checks if all probs sum to 1 and that some probs do not fall below a threshold"""
-    threshold = 0.2
+    min_threshold = 0.2
+    max_threshold = 0.35
     probs = [i[1] for i in func_probs]
-    if sum(probs) != 1 or min(probs) < threshold:
+    if sum(probs) != 1 or min(probs) < min_threshold:
         # set all probs below threshold to threshold
-        probs_new = [i if i>= threshold else threshold for i in probs]
+        probs_new = [i if i>= min_threshold else min_threshold for i in probs]
 
         # check the max threshold
-        probs_new = [i if i <= 1-((len(func_probs)-1) * threshold) else 1-((len(func_probs)-1) * threshold)
-                     for i in probs]
+        probs_new = [i if i <= max_threshold else max_threshold
+                     for i in probs_new]
 
         # "normalize" to set the sum of all weights to 1
         probs_new = [i/sum(probs_new) for i in probs_new]
@@ -263,6 +264,29 @@ def calculate_genotype_inverted_weights(programs, function_set, feature_names):
 
 
     return list(operators.values()), list(features.values())
+
+def _calculate_phenotypic_weights(func_probs, replacement, parent_raw_fitness, offspring_raw_fitness):
+    updated_probs = []
+    update_rate = 0.01
+    fitness_dev = offspring_raw_fitness - parent_raw_fitness
+    # approach: decrease the prob for a func if fitness decreased and vv
+    if type(replacement) == int:
+        # case if it is a terminal
+        updated_probs = func_probs
+    else:
+        if fitness_dev < 0:
+            for i in func_probs:
+                if i[0] in replacement:
+                    updated_probs.append((i[0], i[1] - update_rate))
+                else:
+                    updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
+        else:
+            for i in func_probs:
+                if i[0] in replacement:
+                    updated_probs.append((i[0], i[1] + update_rate))
+                else:
+                    updated_probs.append((i[0], i[1] - update_rate/(len(func_probs)-1)))
+    return updated_probs
 
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
     n_samples, n_features = X[train_indices].shape
@@ -423,7 +447,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     programs = []
 
     for i in range(n_programs):
-
+        replacement = []
         random_state = check_random_state(seeds[i])
 
         # initialize probs for funcs and terminals !!!! -> Now done on a global level
@@ -472,19 +496,20 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'parent_idx': parent_index,
                           'parent_nodes': removed}
             elif method < method_probs[3]:
-
+                if any(x[1] <= 0 for x in function_probs):
+                    function_probs = _validate_glob_probs(function_probs) #safety net
 
                 program, mutated, replacement = parent.point_mutation(random_state, function_probs)
 
-                if probabilistic_phenotype_operators and replacement is not None:
-                    function_probs = _update_glob_probs(function_probs, replacement)
-                elif probabilistic_genotype_operators:
+#                if probabilistic_phenotype_operators and replacement is not None:
+#                    function_probs = _update_glob_probs(function_probs, replacement)
+                if probabilistic_genotype_operators:
                     operator_weights, donor_weights = calculate_genotype_inverted_weights(programs, function_set,
                                                                                           feature_names)
                     function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
+                    #validate probs
+                    function_probs = _validate_glob_probs(function_probs)
 
-                #validate probs
-                function_probs = _validate_glob_probs(function_probs)
                 if i%10 ==0:
                     print(function_probs)
                 genome = {'method': 'Point Mutation',
@@ -574,6 +599,12 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
             if max_samples < n_samples:
                 # Calculate OOB fitness
                 program.oob_fitness_ = program.raw_fitness(X[train_indices], y[train_indices], oob_sample_weight)
+
+        if replacement != []:
+             if probabilistic_phenotype_operators:
+                 function_probs = _calculate_phenotypic_weights(function_probs, replacement, parent.raw_fitness_, program.raw_fitness_)
+                 # validate probs
+                 function_probs = _validate_glob_probs(function_probs)
 
         programs.append(program)
 
