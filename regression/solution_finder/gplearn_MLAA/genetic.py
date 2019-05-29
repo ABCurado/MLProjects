@@ -315,6 +315,8 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     semantical_computation = params["semantical_computation"]
     special_fitness = params['special_fitness']
     selection_method = params['selection_method']
+    probabilistic_genotype_operators = params['probabilistic_genotype_operators']
+    probabilistic_phenotype_operators = params['probabilistic_phenotype_operators']
     function_probs = function_probs
 
     max_samples = int(max_samples * n_samples)
@@ -416,14 +418,16 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                           'parent_nodes': removed}
             elif method < method_probs[3]:
 
-                #operator_weights, donor_weights = calculate_genotype_inverted_weights(programs, function_set,
-                #                                                                      feature_names)
-                #function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
 
-                # point_mutation
                 program, mutated, replacement = parent.point_mutation(random_state, function_probs)
-                if replacement is not None:
+
+                if probabilistic_phenotype_operators and replacement is not None:
                     function_probs = _update_glob_probs(function_probs, replacement)
+                elif probabilistic_genotype_operators:
+                    operator_weights, donor_weights = calculate_genotype_inverted_weights(programs, function_set,
+                                                                                          feature_names)
+                    function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
+
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
@@ -597,7 +601,10 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  log=False,
                  random_state=None,
                  selection_method="tournament",
-                 function_probs=False):
+                 function_probs=False,
+                 probabilistic_genotype_operators=False,
+                 probabilistic_phenotype_operators=False
+                 ):
 
         self.population_size = population_size
         self.hall_of_fame = hall_of_fame
@@ -637,6 +644,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.random_state = random_state
         self.selection_method= selection_method
         self.function_probs = function_probs
+        self.probabilistic_genotype_operators=probabilistic_genotype_operators
+        self.probabilistic_phenotype_operators=probabilistic_phenotype_operators
 
     def _verbose_reporter(self, run_details=None):
         """A report of the progress of the evolution process.
@@ -881,6 +890,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         params['arities'] = self._arities
         params['method_probs'] = self._method_probs
 
+        params['probabilistic_genotype_operators'] = self.probabilistic_genotype_operators
+        params['probabilistic_phenotype_operators'] = self.probabilistic_phenotype_operators
         params['special_fitness'] = self.special_fitness
 
         if not self.warm_start or not hasattr(self, '_programs'):
@@ -925,12 +936,15 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             logger = None
 
         # set up the probs initialization up here
-        func_probs = _initialize_glob_probs(self._function_set)
+        if self.function_probs or self.probabilistic_genotype_operators or self.probabilistic_phenotype_operators:
+            func_probs = _initialize_glob_probs(self._function_set)
+        else:
+            func_probs = None
+
 
         for gen in range(prior_generations, self.generations):
 
             start_time = time()
-            print(func_probs)
 
             if gen == 0:
                 if self.edda_params is not None:
@@ -1336,7 +1350,9 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  log=False,
                  random_state=None,
                  selection_method="tournament",
-                 function_probs=False):
+                 function_probs=False,
+                 probabilistic_genotype_operators=False,
+                 probabilistic_phenotype_operators=False):
 
         super(SymbolicRegressor, self).__init__(
             population_size=population_size,
@@ -1372,7 +1388,9 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             log=log,
             random_state=random_state,
             selection_method=selection_method,
-            function_probs=function_probs)
+            function_probs=function_probs,
+            probabilistic_genotype_operators=probabilistic_genotype_operators,
+            probabilistic_phenotype_operators=probabilistic_phenotype_operators)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""
@@ -1630,7 +1648,8 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
                  low_memory=False,
                  n_jobs=1,
                  verbose=0,
-                 random_state=None):
+                 random_state=None,
+                 probabilistic_genotype_operators=False):
         super(SymbolicClassifier, self).__init__(
             population_size=population_size,
             generations=generations,
@@ -1655,7 +1674,8 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
             low_memory=low_memory,
             n_jobs=n_jobs,
             verbose=verbose,
-            random_state=random_state)
+            random_state=random_state,
+            probabilistic_genotype_operators=probabilistic_genotype_operators)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""
@@ -1938,7 +1958,8 @@ class SymbolicTransformer(BaseSymbolic, TransformerMixin):
                  low_memory=False,
                  n_jobs=1,
                  verbose=0,
-                 random_state=None):
+                 random_state=None,
+                 probabilistic_genotype_operators=False):
         super(SymbolicTransformer, self).__init__(
             population_size=population_size,
             hall_of_fame=hall_of_fame,
@@ -1963,7 +1984,8 @@ class SymbolicTransformer(BaseSymbolic, TransformerMixin):
             low_memory=low_memory,
             n_jobs=n_jobs,
             verbose=verbose,
-            random_state=random_state)
+            random_state=random_state,
+            probabilistic_genotype_operators=probabilistic_genotype_operators)
 
     def __len__(self):
         """Overloads `len` output to be the number of fitted components."""

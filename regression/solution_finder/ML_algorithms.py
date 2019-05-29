@@ -131,7 +131,8 @@ def GS_GP(population_size=1000, generations=20, tournament_size=20, stopping_cri
           p_hoist_mutation=0.01, p_point_mutation=0.01, p_point_replace=0.05,
           tie_stopping_criteria=0.0, edv_stopping_criteria=0.0, n_semantic_neighbors=0,
           max_samples=1.0, feature_names=None, warm_start=False, low_memory=False, n_jobs=1,
-          verbose=0, random_state=None, special_fitness=False, selection_method="tournament", function_probs=True):
+          verbose=0, random_state=None, special_fitness=False, selection_method="tournament",
+          function_probs=True, probabilistic_genotype_operators=False, probabilistic_phenotype_operators=False):
     
     est_gp = SymbolicRegressor(population_size=population_size,
                                generations=generations, tournament_size=tournament_size,
@@ -146,5 +147,6 @@ def GS_GP(population_size=1000, generations=20, tournament_size=20, stopping_cri
                                feature_names=feature_names, warm_start=warm_start,
                                low_memory=low_memory, n_jobs=n_jobs, verbose=verbose,
                                random_state=random_state,special_fitness=special_fitness, selection_method=selection_method,
-                               function_probs=function_probs)
+                               function_probs=function_probs,probabilistic_genotype_operators=probabilistic_genotype_operators,
+                               probabilistic_phenotype_operators = False)
     return est_gp
