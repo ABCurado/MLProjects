@@ -33,12 +33,12 @@ models = [
     #    ("Tree_Bagging", "Tree_Bagging(verbose=False)"),
     #    ("Random_Tree_Forest", "Random_Tree_Forest(verbose=False)"),
     ('GS_GP', 'GS_GP(verbose=False ,special_fitness=False, population_size=1000)'),
-    ('GS_GP', 'GS_GP(verbose=False ,probabilistic_genotype_operators=True, population_size=1000)'),
-    ('GS_GP_special_fitness', 'GS_GP(verbose=False ,special_fitness=True, population_size=1000)'),
-    ("XGBoost", 'XG_Boost(n_estimators=100)')
+    #('GS_GP', 'GS_GP(verbose=False ,probabilistic_genotype_operators=True, population_size=1000)'),
+    #('GS_GP_special_fitness', 'GS_GP(verbose=False ,special_fitness=True, population_size=1000)'),
+    #("XGBoost", 'XG_Boost(n_estimators=100)')
 ]
 
-seed = list(range(0,1))
+seed = list(range(0,5))
 
 export_GS_GP_model = False
 
