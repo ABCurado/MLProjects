@@ -197,16 +197,17 @@ def _initialize_glob_probs(function_set):
 
 def _update_glob_probs(func_probs, replacement):
     updated_probs = []
-    #naive approach ---------------> Issue to be solved: No negative values, no probs below a certain threshold
+    update_rate = 0.01
+    # naive approach: decrease the prob for a func if it was used
     if type(replacement) == int:
         # case if it is a terminal
         updated_probs = func_probs
     else:
         for i in func_probs:
             if i[0] == replacement:
-                updated_probs.append((i[0], i[1] - 0.01))
+                updated_probs.append((i[0], i[1] - update_rate))
             else:
-                updated_probs.append((i[0], i[1] + 0.01/(len(func_probs)-1)))
+                updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
     return updated_probs
 
 def _validate_glob_probs(func_probs):
