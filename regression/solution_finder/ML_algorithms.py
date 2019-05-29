@@ -148,5 +148,5 @@ def GS_GP(population_size=1000, generations=20, tournament_size=20, stopping_cri
                                low_memory=low_memory, n_jobs=n_jobs, verbose=verbose,
                                random_state=random_state,special_fitness=special_fitness, selection_method=selection_method,
                                function_probs=function_probs,probabilistic_genotype_operators=probabilistic_genotype_operators,
-                               probabilistic_phenotype_operators = False)
+                               probabilistic_phenotype_operators = probabilistic_phenotype_operators)
     return est_gp
