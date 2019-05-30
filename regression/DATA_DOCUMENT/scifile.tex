@@ -15,7 +15,7 @@
 
 \usepackage{times}
 \usepackage{hyperref}
-
+\usepackage{xcolor}
 % The preamble here sets up a lot of new/revised commands and
 % environments.  It's annoying, but please do *not* try to strip these
 % out into a separate .sty file (which could lead to the loss of some
@@ -107,8 +107,11 @@
 % Place your abstract within the special {sciabstract} environment.
 
 \begin{sciabstract}
-  The key objective of our project is to investigate and identify key factors affecting portuguese unemployment rates at a municipal level. In addition to implementing a predictive system for unemployment rates, we aim to attain further insight to the underlying factors identified, providing key information for municipalities and their projected path. 
-
+  The key objective of our project is to investigate and identify key factors
+  affecting portuguese unemployment rates at a municipal level. In addition to
+  implementing a predictive system for unemployment rates, we aim to attain further insight to the
+  underlying factors identified, providing key information for municipalities and their projected path.
+  {\color{red} Add the techniques we tried in gp, results of benchmarking}
 \end{sciabstract}
 
 
@@ -128,28 +131,46 @@
 
 \section*{Data}
 
-{The data retrieved and utilized to compose this dataset were taken from pordata, the database of Contempory Portugal. All data was retrieved on a municipality level and joined on the unique municipality. The collected is exclusively from year 2011. As in this year the census took place the data is particurlaly versatile and consists of many features. The data can be retrieved \href{https://drive.google.com/open?id=1oQgpETAuAHQqdlWaiQMgGuqTx9VxdCZY}{here}.
+{
+\textcolor{red}{Somehow get some numbers in this section?}
+The data retrieved and utilized to compose this dataset were taken from pordata, the database of Contempory Portugal. All data was retrieved on a municipality level and joined on the unique municipality. The collected is exclusively from year 2011. As in this year the census took place the data is particurlaly versatile and consists of many features. The data can be retrieved \href{https://drive.google.com/open?id=1oQgpETAuAHQqdlWaiQMgGuqTx9VxdCZY}{here}.
 
 The collected data consists of relevant factors and are described below.
 
-\subsection*{\textit{Composition of Unemployment}}
+\paragraph*{\textit{Composition of Unemployment}}
 In this section data was taken describing the composition of unemployment based on age groups, education per sex and job seek per sex (a binary variable saying if the person seeks a job for the first time or not).
 
-\subsection*{\textit{Average Wages}}
+\paragraph*{\textit{Average Wages}}
 Data, which describe the average earnings/wages in each municipality were taken into consideration. These are split into average wages per education, per position and per industry sector.
 
-\subsection*{\textit{Municipal Finances \& Economy}}
+\paragraph*{\textit{Municipal Finances \& Economy}}
 Municipal finances such as the current revenue, current expenditure and capital expenditure were considered. In order to make the municipalities comparable the \textit{per capita} values were taken. Furthermore, the enterprise density and labor productivity are composed to the dataset.
 
-\subsection*{\textit{Population Composition}}
+\paragraph*{\textit{Population Composition}}
 The share of foreigners living in a municipality, the age composition, the young-dependency ratio, the ageing index, the population density and the potential sustainability index were used.
 
-
-\subsection*{\textit{Political Affiliation}}
+\paragraph*{\textit{Political Affiliation}}
 The result of the 2011 parliament election were taken into consideration.
 
 }
 
+
+\section*{Techniques tried \textcolor{red}{With rational behind why we did it}}
+
+\subsection*{Operator probabilities}
+\subsection*{Selection Methods}
+\subsection*{Special fitness}
+\subsection*{New operators \textcolor{red}{If we do some}}
+
+\section*{Experimental Methodology \textcolor{red}{Aka benchmarking}}
+
+\section*{Analysis of results \textcolor{red}{Aka benchmarking}}
+
+\section*{Conclusions \textcolor{red}{Need to improve from last report ahah}}
+
+\section*{Further work \textcolor{red}{Easy to find stuff related to Operator probabilities }}
+
+\section*{References \textcolor{red}{Haha}}
 
 
 \end{document}
