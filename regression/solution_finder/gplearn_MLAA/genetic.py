@@ -1001,9 +1001,8 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
 
         file_name = "../log_files/" + "operator_probs_" + str(datetime.datetime.now().hour) + \
                     "_" + str(datetime.datetime.now().minute) + "_log.csv"
-        header_string = str(self._function_set)
         with open(file_name, "w") as myfile:
-            myfile.write(header_string + "\n")
+            myfile.write(",".join([str(value) for value in self._function_set]) + "\n")
 
         for gen in range(prior_generations, self.generations):
 
@@ -1027,7 +1026,6 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             # Parallel loop
             n_jobs, n_programs, starts = _partition_estimators(self.population_size, self.n_jobs)
             seeds = random_state.randint(MAX_INT, size=self.population_size)
-            print(func_probs)
 
             results = Parallel(n_jobs=self.n_jobs, verbose=int(self.verbose > 1))(
                 delayed(_parallel_evolve)(n_programs[i],
