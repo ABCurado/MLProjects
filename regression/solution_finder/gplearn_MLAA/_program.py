@@ -766,7 +766,7 @@ class _Program(object):
                        set(range(start + sub_start, start + sub_end)))
         return self.program[:start] + hoist + self.program[end:], removed
 
-    def point_mutation(self, random_state, func_probs=None):
+    def point_mutation(self, random_state, func_probs=None, term_probs=None):
         """Perform the point mutation operation on the program.
 
         Point mutation selects random nodes from the embedded program to be
@@ -809,18 +809,33 @@ class _Program(object):
                 operators.append(replacement)
             else:
                 # We've got a terminal, add a const or variable
-                if self.const_range is not None:
-                    terminal = random_state.randint(self.n_features + 1)
+                if term_probs is not None:
+                    if self.const_range is not None:
+                        const = random_state.randint(self.n_features + 1)
+                        if const == self.n_features:
+                            terminal = random_state.uniform(*self.const_range)
+                            if self.const_range is None:
+                                # We should never get here
+                                raise ValueError('A constant was produced with '
+                                                 'const_range=None.')
+                        else:
+                            terminal = random_state.choice([term[1] for term in term_probs],
+                                                              p=[term[2] for term in term_probs])
+                            # the terminal should only be returned if it is a var and not a const
+                            operators.append(terminal)
+
                 else:
-                    terminal = random_state.randint(self.n_features)
-                if terminal == self.n_features:
-                    terminal = random_state.uniform(*self.const_range)
-                    if self.const_range is None:
-                        # We should never get here
-                        raise ValueError('A constant was produced with '
-                                         'const_range=None.')
+                    if self.const_range is not None:
+                        terminal = random_state.randint(self.n_features + 1)
+                    else:
+                        terminal = random_state.randint(self.n_features)
+                    if terminal == self.n_features:
+                        terminal = random_state.uniform(*self.const_range)
+                        if self.const_range is None:
+                            # We should never get here
+                            raise ValueError('A constant was produced with '
+                                             'const_range=None.')
                 program[node] = terminal
-                operators.append(terminal)
 
         return program, list(mutate), operators
 
