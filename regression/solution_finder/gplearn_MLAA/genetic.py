@@ -320,6 +320,26 @@ def _calculate_phenotypic_weights(func_probs, replacement, parent_raw_fitness, o
                     updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
     return updated_probs
 
+def _calculate_phenotypic_weights_term(term_probs, replacement, parent_raw_fitness_, offspring_raw_fitness_):
+    updated_probs = []
+    update_rate = 0.01
+    fitness_dev = offspring_raw_fitness_ - parent_raw_fitness_
+    # approach: decrease the prob for a func if fitness increases and vv -> minimization problem
+    if fitness_dev < 0:
+        for i in term_probs:
+            if i[1] in replacement:
+                updated_probs.append((i[0], i[1], i[2] + update_rate))
+            else:
+                updated_probs.append((i[0], i[1], i[2] - update_rate/(len(term_probs)-1)))
+    else:
+        for i in term_probs:
+            if i[1] in replacement:
+                updated_probs.append((i[0], i[1], i[2] - update_rate))
+            else:
+                updated_probs.append((i[0], i[1], i[2] + update_rate/(len(term_probs)-1)))
+
+    return updated_probs
+
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
     n_samples, n_features = X[train_indices].shape
     # Unpack parameters
@@ -426,7 +446,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     semantical_computation = params["semantical_computation"]
     special_fitness = params['special_fitness']
     selection_method = params['selection_method']
-    probabilistic_genotype_operators = params['probabilistic_genotype_operators']
+    probabilistic_operators = params['probabilistic_operators']
     probabilistic_phenotype_operators = params['probabilistic_phenotype_operators']
     function_probs = function_probs
     term_probs = term_probs
@@ -539,7 +559,7 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
 
 #                if probabilistic_phenotype_operators and replacement is not None:
 #                    function_probs = _update_glob_probs(function_probs, replacement)
-                if probabilistic_genotype_operators:
+                if probabilistic_operators == "geno":
                     operator_weights, donor_weights = calculate_genotype_inverted_weights(programs, function_set,
                                                                                           feature_names)
                     function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
@@ -638,10 +658,12 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                 # Calculate OOB fitness
                 program.oob_fitness_ = program.raw_fitness(X[train_indices], y[train_indices], oob_sample_weight)
 
-        if replacement != [] and probabilistic_phenotype_operators:
+        if replacement != [] and probabilistic_operators== "pheno":
             function_probs = _calculate_phenotypic_weights(function_probs, replacement, parent.raw_fitness_, program.raw_fitness_)
+            term_probs = _calculate_phenotypic_weights_term(term_probs, replacement, parent.raw_fitness_, program.raw_fitness_)
             # validate probs
             function_probs = _validate_glob_probs(function_probs)
+            term_probs = _validate_term_probs(term_probs)
 
         programs.append(program)
 
@@ -697,7 +719,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  random_state=None,
                  selection_method="tournament",
                  function_probs=False,
-                 probabilistic_genotype_operators=False,
+                 probabilistic_operators=False,
                  probabilistic_phenotype_operators=False
                  ):
 
@@ -739,7 +761,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.random_state = random_state
         self.selection_method= selection_method
         self.function_probs = function_probs
-        self.probabilistic_genotype_operators=probabilistic_genotype_operators
+        self.probabilistic_operators=probabilistic_operators
         self.probabilistic_phenotype_operators=probabilistic_phenotype_operators
 
     def _verbose_reporter(self, run_details=None):
@@ -985,7 +1007,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         params['arities'] = self._arities
         params['method_probs'] = self._method_probs
 
-        params['probabilistic_genotype_operators'] = self.probabilistic_genotype_operators
+        params['probabilistic_operators'] = self.probabilistic_operators
         params['probabilistic_phenotype_operators'] = self.probabilistic_phenotype_operators
         params['special_fitness'] = self.special_fitness
 
@@ -1031,7 +1053,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             logger = None
 
         # set up the probs initialization up here
-        if self.function_probs or self.probabilistic_genotype_operators or self.probabilistic_phenotype_operators:
+        if self.function_probs or self.probabilistic_operators or self.probabilistic_phenotype_operators:
             func_probs = _initialize_glob_probs(self._function_set)
             term_probs = _initialize_term_probs(self.feature_names)
         else:
@@ -1472,7 +1494,7 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  random_state=None,
                  selection_method="tournament",
                  function_probs=False,
-                 probabilistic_genotype_operators=False,
+                 probabilistic_operators=False,
                  probabilistic_phenotype_operators=False):
 
         super(SymbolicRegressor, self).__init__(
@@ -1510,7 +1532,7 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             random_state=random_state,
             selection_method=selection_method,
             function_probs=function_probs,
-            probabilistic_genotype_operators=probabilistic_genotype_operators,
+            probabilistic_operators=probabilistic_operators,
             probabilistic_phenotype_operators=probabilistic_phenotype_operators)
 
     def __str__(self):
@@ -1770,7 +1792,7 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
                  n_jobs=1,
                  verbose=0,
                  random_state=None,
-                 probabilistic_genotype_operators=False):
+                 probabilistic_operators=False):
         super(SymbolicClassifier, self).__init__(
             population_size=population_size,
             generations=generations,
@@ -1796,7 +1818,7 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
             n_jobs=n_jobs,
             verbose=verbose,
             random_state=random_state,
-            probabilistic_genotype_operators=probabilistic_genotype_operators)
+            probabilistic_operators=probabilistic_operators)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""
@@ -2080,7 +2102,7 @@ class SymbolicTransformer(BaseSymbolic, TransformerMixin):
                  n_jobs=1,
                  verbose=0,
                  random_state=None,
-                 probabilistic_genotype_operators=False):
+                 probabilistic_operators=False):
         super(SymbolicTransformer, self).__init__(
             population_size=population_size,
             hall_of_fame=hall_of_fame,
@@ -2106,7 +2128,7 @@ class SymbolicTransformer(BaseSymbolic, TransformerMixin):
             n_jobs=n_jobs,
             verbose=verbose,
             random_state=random_state,
-            probabilistic_genotype_operators=probabilistic_genotype_operators)
+            probabilistic_operators=probabilistic_operators)
 
     def __len__(self):
         """Overloads `len` output to be the number of fitted components."""
