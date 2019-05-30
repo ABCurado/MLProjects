@@ -203,7 +203,7 @@ def _initialize_term_probs(function_set):
     return [(func,i, 1 / len(function_names)) for i,func in enumerate(function_names)]
 
 
-def _update_glob_probs(func_probs, replacement):
+def _naive_update_func_probs(func_probs, replacement):
     updated_probs = []
     update_rate = 0.01
     # naive approach: decrease the prob for a func if it was used
@@ -212,10 +212,25 @@ def _update_glob_probs(func_probs, replacement):
         updated_probs = func_probs
     else:
         for i in func_probs:
-            if i[0] == replacement:
+            if i[0] in replacement:
                 updated_probs.append((i[0], i[1] - update_rate))
             else:
                 updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
+    return updated_probs
+
+def _naive_update_term_probs(func_probs, replacement):
+    updated_probs = []
+    update_rate = 0.01
+    # naive approach: decrease the prob for a func if it was used
+    if type(replacement) == int:
+        # case if it is a terminal
+        updated_probs = func_probs
+    else:
+        for i in func_probs:
+            if i[1] in replacement:
+                updated_probs.append((i[0], i[1], i[2] - update_rate))
+            else:
+                updated_probs.append((i[0], i[1], i[2] + update_rate/(len(func_probs)-1)))
     return updated_probs
 
 def _validate_glob_probs(func_probs):
@@ -447,7 +462,6 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     special_fitness = params['special_fitness']
     selection_method = params['selection_method']
     probabilistic_operators = params['probabilistic_operators']
-    probabilistic_phenotype_operators = params['probabilistic_phenotype_operators']
     function_probs = function_probs
     term_probs = term_probs
 
@@ -503,13 +517,6 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
         replacement = []
         random_state = check_random_state(seeds[i])
 
-        # initialize probs for funcs and terminals !!!! -> Now done on a global level
-#        if function_probs == True:
-#            program.set_function_probs(function_set)
-        #adjust probs
-#        elif (function_probs is not None or function_probs is not True):
- #           pass
-
         if parents is None:
             program = None
             genome = None
@@ -552,13 +559,11 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                 if any(x[1] <= 0 for x in function_probs):
                     function_probs = _validate_glob_probs(function_probs) #safety net
 
-#                if any(x[1] <= 0 for x in term_probs):
-#                    term_probs = _validate_glob_probs(term_probs) #safety net
+                if any(x[1] <= 0 for x in term_probs):
+                    term_probs = _validate_term_probs(term_probs) #safety net
 
                 program, mutated, replacement = parent.point_mutation(random_state, function_probs, term_probs)
 
-#                if probabilistic_phenotype_operators and replacement is not None:
-#                    function_probs = _update_glob_probs(function_probs, replacement)
                 if probabilistic_operators == "geno":
                     operator_weights, donor_weights = calculate_genotype_inverted_weights(programs, function_set,
                                                                                           feature_names)
@@ -568,8 +573,14 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                     function_probs = _validate_glob_probs(function_probs)
                     term_probs = _validate_term_probs(term_probs)
 
-                #if i%10 ==0:
-                #    print(function_probs)
+                if probabilistic_operators == "naive":
+                    function_probs = _naive_update_func_probs(function_probs, replacement)
+                    term_probs = _naive_update_term_probs(term_probs, replacement)
+
+                    #validate probs
+                    function_probs = _validate_glob_probs(function_probs)
+                    term_probs = _validate_term_probs(term_probs)
+
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
@@ -718,9 +729,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  log=False,
                  random_state=None,
                  selection_method="tournament",
-                 function_probs=False,
-                 probabilistic_operators=False,
-                 probabilistic_phenotype_operators=False
+                 probabilistic_operators=False
                  ):
 
         self.population_size = population_size
@@ -760,9 +769,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.log = log
         self.random_state = random_state
         self.selection_method= selection_method
-        self.function_probs = function_probs
         self.probabilistic_operators=probabilistic_operators
-        self.probabilistic_phenotype_operators=probabilistic_phenotype_operators
 
     def _verbose_reporter(self, run_details=None):
         """A report of the progress of the evolution process.
@@ -1008,7 +1015,6 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         params['method_probs'] = self._method_probs
 
         params['probabilistic_operators'] = self.probabilistic_operators
-        params['probabilistic_phenotype_operators'] = self.probabilistic_phenotype_operators
         params['special_fitness'] = self.special_fitness
 
         if not self.warm_start or not hasattr(self, '_programs'):
@@ -1053,7 +1059,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             logger = None
 
         # set up the probs initialization up here
-        if self.function_probs or self.probabilistic_operators or self.probabilistic_phenotype_operators:
+        if self.probabilistic_operators:
             func_probs = _initialize_glob_probs(self._function_set)
             term_probs = _initialize_term_probs(self.feature_names)
         else:
@@ -1493,9 +1499,8 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  log=False,
                  random_state=None,
                  selection_method="tournament",
-                 function_probs=False,
-                 probabilistic_operators=False,
-                 probabilistic_phenotype_operators=False):
+                 probabilistic_operators=False
+               ):
 
         super(SymbolicRegressor, self).__init__(
             population_size=population_size,
@@ -1531,9 +1536,7 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             log=log,
             random_state=random_state,
             selection_method=selection_method,
-            function_probs=function_probs,
-            probabilistic_operators=probabilistic_operators,
-            probabilistic_phenotype_operators=probabilistic_phenotype_operators)
+            probabilistic_operators=probabilistic_operators)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""

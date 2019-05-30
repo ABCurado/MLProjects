@@ -34,7 +34,7 @@ models = [
     #    ("Random_Tree_Forest", "Random_Tree_Forest(verbose=False)"),
     #('GS_GP', 'GS_GP(verbose=False ,special_fitness=False, generations=50)'),
 #    ('GS_GP_genotype_operators', 'GS_GP(verbose=False ,probabilistic_genotype_operators=True, generations=50)'),
-   ('GS_GP_phenotype_operators', 'GS_GP(verbose=False ,probabilistic_operators="pheno", generations=50)'),
+   ('GS_GP_phenotype_operators', 'GS_GP(verbose=False ,probabilistic_operators="naive", generations=50)'),
     #('GS_GP_special_fitness', 'GS_GP(verbose=False ,special_fitness=True, generations=50)'),
  #   ("XGBoost", 'XG_Boost(n_estimators=100)')
 ]
