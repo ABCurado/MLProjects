@@ -999,10 +999,10 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         else:
             func_probs = None
 
-        file_name = "../log_files/" + "operator_probs_" + str(datetime.datetime.now().hour) + \
+        file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
                     "_" + str(datetime.datetime.now().minute) + "_log.csv"
         with open(file_name, "w") as myfile:
-            myfile.write(",".join([str(value) for value in self._function_set]) + "\n")
+            myfile.write("generation,"+ ",".join([str(value) for value in self._function_set]) + ",population_fitness,elite_fitness,val_fitness \n")
 
         for gen in range(prior_generations, self.generations):
 
@@ -1048,8 +1048,6 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                     population.append(element)
                 new_func_probs.append(result[1])
             func_probs = new_func_probs[0]
-            with open(file_name, "a") as myfile:
-                myfile.write(','.join([str(operator[1]) for operator in func_probs]) + "\n")
 
 
             fitness = [program.raw_fitness_ for program in population]
@@ -1129,6 +1127,15 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             self.run_details_['best_oob_fitness'].append(oob_fitness)
             generation_time = time() - start_time
             self.run_details_['generation_time'].append(generation_time)
+
+            with open(file_name, "a") as myfile:
+                val_fitness = 0.0
+                if self.val_set > 0.0:
+                    val_fitness = best_program.val_fitness_
+                myfile.write(str(gen)+","+
+                             ','.join([str(operator[1]) for operator in func_probs]) +
+                             ","+str(np.mean(fitness))+","+str(best_program.raw_fitness_)+
+                             ","+ str(val_fitness) +"\n")
 
             if self.verbose:
                 self._verbose_reporter(self.run_details_)
