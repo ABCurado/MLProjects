@@ -195,7 +195,15 @@ def _initialize_glob_probs(function_set):
     # set equal probs for all functions
     return [(func, 1 / len(function_names)) for func in function_names]
 
-def _update_glob_probs(func_probs, replacement):
+def _initialize_term_probs(function_set):
+    # unpack function names and arity
+    function_names = [function_set[i] for i in range(len(function_set))]
+
+    # set equal probs for all functions
+    return [(func,i, 1 / len(function_names)) for i,func in enumerate(function_names)]
+
+
+def _naive_update_func_probs(func_probs, replacement):
     updated_probs = []
     update_rate = 0.01
     # naive approach: decrease the prob for a func if it was used
@@ -204,10 +212,25 @@ def _update_glob_probs(func_probs, replacement):
         updated_probs = func_probs
     else:
         for i in func_probs:
-            if i[0] == replacement:
+            if i[0] in replacement:
                 updated_probs.append((i[0], i[1] - update_rate))
             else:
                 updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
+    return updated_probs
+
+def _naive_update_term_probs(func_probs, replacement):
+    updated_probs = []
+    update_rate = 0.01
+    # naive approach: decrease the prob for a func if it was used
+    if type(replacement) == int:
+        # case if it is a terminal
+        updated_probs = func_probs
+    else:
+        for i in func_probs:
+            if i[1] in replacement:
+                updated_probs.append((i[0], i[1], i[2] - update_rate))
+            else:
+                updated_probs.append((i[0], i[1], i[2] + update_rate/(len(func_probs)-1)))
     return updated_probs
 
 def _validate_glob_probs(func_probs):
@@ -232,6 +255,30 @@ def _validate_glob_probs(func_probs):
         probs_new = func_probs
 
     return probs_new
+
+def _validate_term_probs(term_probs):
+    """Check if all probs sum to 1, and that some probs do not fall below a threshold"""
+    min_threshold = 0.03
+    max_threshold = 0.15
+    probs = [i[2] for i in term_probs]
+    if sum(probs) != 1 or min(probs) < min_threshold:
+        # set all probs below threshold to threshold
+        probs_new = [i if i>= min_threshold else min_threshold for i in probs]
+
+        # check the max threshold
+        probs_new = [i if i <= max_threshold else max_threshold
+                     for i in probs_new]
+
+        # "normalize" to set the sum of all weights to 1
+        probs_new = [i/sum(probs_new) for i in probs_new]
+         # here's a "bug", the prob could fall below the threshold again but never to 0. Could be neglected for now
+
+        probs_new = [(term_probs[i][0], i, probs_new[i]) for i in range(len(term_probs))]
+    else:
+        probs_new = term_probs
+
+    return probs_new
+
 
 def calculate_genotype_inverted_weights(programs, function_set, feature_names):
 
@@ -269,7 +316,7 @@ def _calculate_phenotypic_weights(func_probs, replacement, parent_raw_fitness, o
     updated_probs = []
     update_rate = 0.01
     fitness_dev = offspring_raw_fitness - parent_raw_fitness
-    # approach: decrease the prob for a func if fitness decreased and vv
+    # approach: decrease the prob for a func if fitness increases and vv -> minimization problem
     if type(replacement) == int:
         # case if it is a terminal
         updated_probs = func_probs
@@ -277,15 +324,35 @@ def _calculate_phenotypic_weights(func_probs, replacement, parent_raw_fitness, o
         if fitness_dev < 0:
             for i in func_probs:
                 if i[0] in replacement:
-                    updated_probs.append((i[0], i[1] - update_rate))
-                else:
-                    updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
-        else:
-            for i in func_probs:
-                if i[0] in replacement:
                     updated_probs.append((i[0], i[1] + update_rate))
                 else:
                     updated_probs.append((i[0], i[1] - update_rate/(len(func_probs)-1)))
+        else:
+            for i in func_probs:
+                if i[0] in replacement:
+                    updated_probs.append((i[0], i[1] - update_rate))
+                else:
+                    updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
+    return updated_probs
+
+def _calculate_phenotypic_weights_term(term_probs, replacement, parent_raw_fitness_, offspring_raw_fitness_):
+    updated_probs = []
+    update_rate = 0.01
+    fitness_dev = offspring_raw_fitness_ - parent_raw_fitness_
+    # approach: decrease the prob for a func if fitness increases and vv -> minimization problem
+    if fitness_dev < 0:
+        for i in term_probs:
+            if i[1] in replacement:
+                updated_probs.append((i[0], i[1], i[2] + update_rate))
+            else:
+                updated_probs.append((i[0], i[1], i[2] - update_rate/(len(term_probs)-1)))
+    else:
+        for i in term_probs:
+            if i[1] in replacement:
+                updated_probs.append((i[0], i[1], i[2] - update_rate))
+            else:
+                updated_probs.append((i[0], i[1], i[2] + update_rate/(len(term_probs)-1)))
+
     return updated_probs
 
 def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_weight, train_indices, params, seeds):
@@ -374,7 +441,7 @@ def _get_semantic_stopping_criteria(n_semantic_neighbors, elite, X, y, sample_we
     return tie, edv
 
 
-def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, val_indices, seeds, params, function_probs):
+def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, val_indices, seeds, params, function_probs, term_probs):
     """Private function used to build a batch of programs within a job."""
     n_samples, n_features = X[train_indices].shape
     # Unpack parameters
@@ -394,9 +461,9 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
     semantical_computation = params["semantical_computation"]
     special_fitness = params['special_fitness']
     selection_method = params['selection_method']
-    probabilistic_genotype_operators = params['probabilistic_genotype_operators']
-    probabilistic_phenotype_operators = params['probabilistic_phenotype_operators']
+    probabilistic_operators = params['probabilistic_operators']
     function_probs = function_probs
+    term_probs = term_probs
 
     max_samples = int(max_samples * n_samples)
 
@@ -450,13 +517,6 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
         replacement = []
         random_state = check_random_state(seeds[i])
 
-        # initialize probs for funcs and terminals !!!! -> Now done on a global level
-#        if function_probs == True:
-#            program.set_function_probs(function_set)
-        #adjust probs
-#        elif (function_probs is not None or function_probs is not True):
- #           pass
-
         if parents is None:
             program = None
             genome = None
@@ -499,19 +559,28 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                 if any(x[1] <= 0 for x in function_probs):
                     function_probs = _validate_glob_probs(function_probs) #safety net
 
-                program, mutated, replacement = parent.point_mutation(random_state, function_probs)
+                if any(x[1] <= 0 for x in term_probs):
+                    term_probs = _validate_term_probs(term_probs) #safety net
 
-#                if probabilistic_phenotype_operators and replacement is not None:
-#                    function_probs = _update_glob_probs(function_probs, replacement)
-                if probabilistic_genotype_operators:
+                program, mutated, replacement = parent.point_mutation(random_state, function_probs, term_probs)
+
+                if probabilistic_operators == "geno":
                     operator_weights, donor_weights = calculate_genotype_inverted_weights(programs, function_set,
                                                                                           feature_names)
                     function_probs = [(function_set[i],operator_weights[i]) for i in range(0,len(function_set))]
+                    term_probs = [(feature_names[i],i, donor_weights[i]) for i in range(0,len(feature_names))]
                     #validate probs
                     function_probs = _validate_glob_probs(function_probs)
+                    term_probs = _validate_term_probs(term_probs)
 
-                #if i%10 ==0:
-                #    print(function_probs)
+                if probabilistic_operators == "naive":
+                    function_probs = _naive_update_func_probs(function_probs, replacement)
+                    term_probs = _naive_update_term_probs(term_probs, replacement)
+
+                    #validate probs
+                    function_probs = _validate_glob_probs(function_probs)
+                    term_probs = _validate_term_probs(term_probs)
+
                 genome = {'method': 'Point Mutation',
                           'parent_idx': parent_index,
                           'parent_nodes': mutated}
@@ -600,16 +669,17 @@ def _parallel_evolve(n_programs, parents, X, y, sample_weight, train_indices, va
                 # Calculate OOB fitness
                 program.oob_fitness_ = program.raw_fitness(X[train_indices], y[train_indices], oob_sample_weight)
 
-        if replacement != []:
-             if probabilistic_phenotype_operators:
-                 function_probs = _calculate_phenotypic_weights(function_probs, replacement, parent.raw_fitness_, program.raw_fitness_)
-                 # validate probs
-                 function_probs = _validate_glob_probs(function_probs)
+        if replacement != [] and probabilistic_operators== "pheno":
+            function_probs = _calculate_phenotypic_weights(function_probs, replacement, parent.raw_fitness_, program.raw_fitness_)
+            term_probs = _calculate_phenotypic_weights_term(term_probs, replacement, parent.raw_fitness_, program.raw_fitness_)
+            # validate probs
+            function_probs = _validate_glob_probs(function_probs)
+            term_probs = _validate_term_probs(term_probs)
 
         programs.append(program)
 
 
-    return (programs, function_probs)
+    return (programs, function_probs, term_probs)
 
 class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
 
@@ -659,9 +729,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                  log=False,
                  random_state=None,
                  selection_method="tournament",
-                 function_probs=False,
-                 probabilistic_genotype_operators=False,
-                 probabilistic_phenotype_operators=False
+                 probabilistic_operators=False
                  ):
 
         self.population_size = population_size
@@ -701,9 +769,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         self.log = log
         self.random_state = random_state
         self.selection_method= selection_method
-        self.function_probs = function_probs
-        self.probabilistic_genotype_operators=probabilistic_genotype_operators
-        self.probabilistic_phenotype_operators=probabilistic_phenotype_operators
+        self.probabilistic_operators=probabilistic_operators
 
     def _verbose_reporter(self, run_details=None):
         """A report of the progress of the evolution process.
@@ -948,8 +1014,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         params['arities'] = self._arities
         params['method_probs'] = self._method_probs
 
-        params['probabilistic_genotype_operators'] = self.probabilistic_genotype_operators
-        params['probabilistic_phenotype_operators'] = self.probabilistic_phenotype_operators
+        params['probabilistic_operators'] = self.probabilistic_operators
         params['special_fitness'] = self.special_fitness
 
         if not self.warm_start or not hasattr(self, '_programs'):
@@ -994,15 +1059,16 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             logger = None
 
         # set up the probs initialization up here
-        if self.function_probs or self.probabilistic_genotype_operators or self.probabilistic_phenotype_operators:
+        if self.probabilistic_operators:
             func_probs = _initialize_glob_probs(self._function_set)
+            term_probs = _initialize_term_probs(self.feature_names)
         else:
             func_probs = None
 
-        file_name = "../log_files/" + "operator_probs_" + str(datetime.datetime.now().hour) + \
+        file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
                     "_" + str(datetime.datetime.now().minute) + "_log.csv"
         with open(file_name, "w") as myfile:
-            myfile.write(",".join([str(value) for value in self._function_set]) + "\n")
+            myfile.write("generation,"+ ",".join([str(value) for value in self._function_set]) + ",population_fitness,elite_fitness,val_fitness \n")
 
         for gen in range(prior_generations, self.generations):
 
@@ -1037,16 +1103,19 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                                           val_indices,
                                           seeds[starts[i]:starts[i + 1]],
                                           params,
-                                          func_probs)
+                                          func_probs,
+                                          term_probs)
                 for i in range(n_jobs))
 
             population = []
             new_func_probs = []
+            new_term_probs = []
 
             for result in results:
                 for element in result[0]:
                     population.append(element)
                 new_func_probs.append(result[1])
+                new_term_probs.append(result[2])
             func_probs = new_func_probs[0]
             with open(file_name, "a") as myfile:
                 myfile.write(','.join([str(operator[1]) for operator in func_probs]) + "\n")
@@ -1129,6 +1198,15 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             self.run_details_['best_oob_fitness'].append(oob_fitness)
             generation_time = time() - start_time
             self.run_details_['generation_time'].append(generation_time)
+
+            with open(file_name, "a") as myfile:
+                val_fitness = 0.0
+                if self.val_set > 0.0:
+                    val_fitness = best_program.val_fitness_
+                myfile.write(str(gen)+","+
+                             ','.join([str(operator[1]) for operator in func_probs]) +
+                             ","+str(np.mean(fitness))+","+str(best_program.raw_fitness_)+
+                             ","+ str(val_fitness) +"\n")
 
             if self.verbose:
                 self._verbose_reporter(self.run_details_)
@@ -1421,9 +1499,8 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
                  log=False,
                  random_state=None,
                  selection_method="tournament",
-                 function_probs=False,
-                 probabilistic_genotype_operators=False,
-                 probabilistic_phenotype_operators=False):
+                 probabilistic_operators=False
+               ):
 
         super(SymbolicRegressor, self).__init__(
             population_size=population_size,
@@ -1460,9 +1537,7 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             log=log,
             random_state=random_state,
             selection_method=selection_method,
-            function_probs=function_probs,
-            probabilistic_genotype_operators=probabilistic_genotype_operators,
-            probabilistic_phenotype_operators=probabilistic_phenotype_operators)
+            probabilistic_operators=probabilistic_operators)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""
@@ -1721,7 +1796,7 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
                  n_jobs=1,
                  verbose=0,
                  random_state=None,
-                 probabilistic_genotype_operators=False):
+                 probabilistic_operators=False):
         super(SymbolicClassifier, self).__init__(
             population_size=population_size,
             generations=generations,
@@ -1747,7 +1822,7 @@ class SymbolicClassifier(BaseSymbolic, ClassifierMixin):
             n_jobs=n_jobs,
             verbose=verbose,
             random_state=random_state,
-            probabilistic_genotype_operators=probabilistic_genotype_operators)
+            probabilistic_operators=probabilistic_operators)
 
     def __str__(self):
         """Overloads `print` output of the object to resemble a LISP tree."""
@@ -2031,7 +2106,7 @@ class SymbolicTransformer(BaseSymbolic, TransformerMixin):
                  n_jobs=1,
                  verbose=0,
                  random_state=None,
-                 probabilistic_genotype_operators=False):
+                 probabilistic_operators=False):
         super(SymbolicTransformer, self).__init__(
             population_size=population_size,
             hall_of_fame=hall_of_fame,
@@ -2057,7 +2132,7 @@ class SymbolicTransformer(BaseSymbolic, TransformerMixin):
             n_jobs=n_jobs,
             verbose=verbose,
             random_state=random_state,
-            probabilistic_genotype_operators=probabilistic_genotype_operators)
+            probabilistic_operators=probabilistic_operators)
 
     def __len__(self):
         """Overloads `len` output to be the number of fitted components."""
