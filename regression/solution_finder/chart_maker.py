@@ -6,7 +6,7 @@ from itertools import cycle
 # Color Cycle
 cycol = cycle('bgkyrcm')
 
-df = pd.read_csv('../log_files/fitness_&_operator_probs_16_12_log.csv')
+df = pd.read_csv('../log_files/fitness_&_operator_probs_21_28_log.csv')
 df = df.drop(["elite_fitness", "generation", "population_fitness"], axis=1)
 x = df.index
 operator_lines = []

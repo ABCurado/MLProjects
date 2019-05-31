@@ -1065,10 +1065,15 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
         else:
             func_probs = None
 
-        file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
-                    "_" + str(datetime.datetime.now().minute) + "_log.csv"
-        with open(file_name, "w") as myfile:
-            myfile.write("generation,"+ ",".join([str(value) for value in self._function_set]) + ",population_fitness,elite_fitness,val_fitness \n")
+        if self.probabilistic_operators:
+            file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
+                        "_" + str(datetime.datetime.now().minute) + "_log.csv"
+            with open(file_name, "w") as myfile:
+               myfile.write("generation,"+
+                            ",".join([str(value) for value in self._function_set]) +
+                            ",".join([str(value) for value in self.feature_names]) +
+                            ",population_fitness,elite_fitness,val_fitness \n")
+
 
         for gen in range(prior_generations, self.generations):
 
@@ -1117,8 +1122,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                 new_func_probs.append(result[1])
                 new_term_probs.append(result[2])
             func_probs = new_func_probs[0]
-            with open(file_name, "a") as myfile:
-                myfile.write(','.join([str(operator[1]) for operator in func_probs]) + "\n")
+
 
 
             fitness = [program.raw_fitness_ for program in population]
@@ -1203,10 +1207,11 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                 val_fitness = 0.0
                 if self.val_set > 0.0:
                     val_fitness = best_program.val_fitness_
-                myfile.write(str(gen)+","+
+                myfile.write(str(gen) + "," +
                              ','.join([str(operator[1]) for operator in func_probs]) +
-                             ","+str(np.mean(fitness))+","+str(best_program.raw_fitness_)+
-                             ","+ str(val_fitness) +"\n")
+                             ','.join([str(operator[1]) for operator in term_probs]) +
+                             "," + str(np.mean(fitness)) + "," + str(best_program.raw_fitness_) +
+                             "," + str(val_fitness) + "\n")
 
             if self.verbose:
                 self._verbose_reporter(self.run_details_)
