@@ -1064,6 +1064,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             term_probs = _initialize_term_probs(self.feature_names)
         else:
             func_probs = None
+            term_probs = None
 
         if self.probabilistic_operators:
             file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
@@ -1122,7 +1123,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                 new_func_probs.append(result[1])
                 new_term_probs.append(result[2])
             func_probs = new_func_probs[0]
-
+            term_probs = new_term_probs[0]
 
 
             fitness = [program.raw_fitness_ for program in population]
