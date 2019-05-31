@@ -1205,7 +1205,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                 if self.val_set > 0.0:
                     val_fitness = best_program.val_fitness_
                 myfile.write(str(gen) + "," +
-                             ','.join([str(operator[1]) for operator in func_probs]) +
+                             ','.join([str(operator[1]) for operator in func_probs]) + ',' +
                              ','.join([str(operator[2]) for operator in term_probs]) +
                              "," + str(np.mean(fitness)) + "," + str(best_program.raw_fitness_) +
                              "," + str(val_fitness) + "\n")
