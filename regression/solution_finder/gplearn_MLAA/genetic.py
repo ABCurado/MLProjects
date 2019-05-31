@@ -1528,6 +1528,7 @@ class SymbolicRegressor(BaseSymbolic, RegressorMixin):
             p_point_mutation=p_point_mutation,
             p_point_replace=p_point_replace,
             special_fitness=special_fitness,
+            p_gs_crossover=p_gs_crossover,
             p_gs_mutation=p_gs_mutation,
             gsm_ms=gsm_ms,
             semantical_computation=semantical_computation,
