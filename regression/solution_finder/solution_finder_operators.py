@@ -44,8 +44,9 @@ models = [
     ('GP_fitness', 'GS_GP(verbose=False, special_fitness=True)'),
     
     # Probabilistic operators
-    ('GP_genotype_operators', 'GS_GP(verbose=False, probabilistic_operators=False)'),
-    ('GP_phenotype_operators', 'GS_GP(verbose=False, probabilistic_operators=False)')
+    ('GP_no_operator', 'GS_GP(verbose=False, probabilistic_operators=False)'),
+    ('GP_geno_operator', 'GS_GP(verbose=False, probabilistic_operators="geno")'),
+    ('GP_naive_operator', 'GS_GP(verbose=False, probabilistic_operators="naive")')
     
      # Selection Methods GSGP
     #('GS_GP_tournament', 'GS_GP(verbose=False, selection_method="tournament", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
