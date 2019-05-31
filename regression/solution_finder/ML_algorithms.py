@@ -129,7 +129,7 @@ def GS_GP(population_size=1000, generations=20, tournament_size=20, stopping_cri
           function_set=('add', 'sub', 'mul', 'div'), metric='mean absolute error',
           parsimony_coefficient=0.001, p_crossover=0.9, p_subtree_mutation=0.01,
           p_hoist_mutation=0.01, p_point_mutation=0.01, p_point_replace=0.05,
-          tie_stopping_criteria=0.0, edv_stopping_criteria=0.0, n_semantic_neighbors=0,
+          tie_stopping_criteria=0.0, edv_stopping_criteria=0.0, n_semantic_neighbors=0, p_gs_crossover=0.0, p_gs_mutation=0.0, gsm_ms=0.0, semantical_computation=False,
           max_samples=1.0, feature_names=None, warm_start=False, low_memory=False, n_jobs=1,
           verbose=0, random_state=None, special_fitness=False, selection_method="tournament",
           function_probs=True, probabilistic_genotype_operators=False, probabilistic_phenotype_operators=False):
@@ -141,7 +141,7 @@ def GS_GP(population_size=1000, generations=20, tournament_size=20, stopping_cri
                                parsimony_coefficient=parsimony_coefficient,
                                p_crossover=p_crossover, p_subtree_mutation=p_subtree_mutation,
                                p_hoist_mutation=p_hoist_mutation, p_point_mutation=p_point_mutation,
-                               p_point_replace=p_point_replace, max_samples=max_samples,
+                               p_point_replace=p_point_replace,p_gs_crossover = p_gs_crossover,p_gs_mutation = p_gs_mutation, gsm_ms = gsm_ms, semantical_computation = semantical_computation, max_samples=max_samples,
                                tie_stopping_criteria=tie_stopping_criteria, edv_stopping_criteria=edv_stopping_criteria, n_semantic_neighbors=n_semantic_neighbors,
                                feature_names=feature_names, warm_start=warm_start,
                                low_memory=low_memory, n_jobs=n_jobs, verbose=verbose,
