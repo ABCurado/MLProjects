@@ -1067,9 +1067,9 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                     "_" + str(datetime.datetime.now().minute) + "_log.csv"
         with open(file_name, "w") as myfile:
            myfile.write("generation,"+
-                        ",".join([str(value) for value in self._function_set]) +
+                        ",".join([str(value) for value in self._function_set]) +"," +
                         ",".join([str(value) for value in self.feature_names]) +
-                        ",population_fitness,elite_fitness,val_fitness \n")
+                        ",population_fitness,elite_fitness,val_fitness\n")
 
 
         for gen in range(prior_generations, self.generations):
@@ -1206,7 +1206,7 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                     val_fitness = best_program.val_fitness_
                 myfile.write(str(gen) + "," +
                              ','.join([str(operator[1]) for operator in func_probs]) +
-                             ','.join([str(operator[1]) for operator in term_probs]) +
+                             ','.join([str(operator[2]) for operator in term_probs]) +
                              "," + str(np.mean(fitness)) + "," + str(best_program.raw_fitness_) +
                              "," + str(val_fitness) + "\n")
 
