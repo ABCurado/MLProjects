@@ -195,9 +195,9 @@ def _initialize_glob_probs(function_set):
     # set equal probs for all functions
     return [(func, 1 / len(function_names)) for func in function_names]
 
-def _initialize_term_probs(function_set):
+def _initialize_term_probs(feature_names):
     # unpack function names and arity
-    function_names = [function_set[i] for i in range(len(function_set))]
+    function_names = [feature_names[i] for i in range(len(feature_names))]
 
     # set equal probs for all functions
     return [(func,i, 1 / len(function_names)) for i,func in enumerate(function_names)]
@@ -1059,21 +1059,17 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
             logger = None
 
         # set up the probs initialization up here
-        if self.probabilistic_operators:
-            func_probs = _initialize_glob_probs(self._function_set)
-            term_probs = _initialize_term_probs(self.feature_names)
-        else:
-            func_probs = None
-            term_probs = None
+        func_probs = _initialize_glob_probs(self._function_set)
+        term_probs = _initialize_term_probs(self.feature_names)
 
-        if self.probabilistic_operators:
-            file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
-                        "_" + str(datetime.datetime.now().minute) + "_log.csv"
-            with open(file_name, "w") as myfile:
-               myfile.write("generation,"+
-                            ",".join([str(value) for value in self._function_set]) +
-                            ",".join([str(value) for value in self.feature_names]) +
-                            ",population_fitness,elite_fitness,val_fitness \n")
+
+        file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
+                    "_" + str(datetime.datetime.now().minute) + "_log.csv"
+        with open(file_name, "w") as myfile:
+           myfile.write("generation,"+
+                        ",".join([str(value) for value in self._function_set]) +
+                        ",".join([str(value) for value in self.feature_names]) +
+                        ",population_fitness,elite_fitness,val_fitness \n")
 
 
         for gen in range(prior_generations, self.generations):
