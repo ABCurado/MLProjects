@@ -85,7 +85,7 @@ def algo_run(seed, model):
 def add_seed(model, seed,X):
     if "Keras" in model[0]:
         model_eval = model[1][:-1]+",input_dim="+str(X.shape[1])+")"
-    elif "GS_GP" in model[0]:
+    elif "GP" in model[0]:
         model_eval = model[1][:-1]+",random_state="+str(seed)+",feature_names="+str(list(X.columns))+")"
     elif "Tree" in model[0]:
         model_eval = model[1][:-1]+",random_state="+str(seed)+")"
