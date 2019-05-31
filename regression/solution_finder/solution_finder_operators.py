@@ -35,32 +35,31 @@ models = [
     #('GS_GP', 'GS_GP(verbose=False ,special_fitness=False, generations=50)'),
     
     # Selection Methods
-    #('GP_tournament', 'GS_GP(verbose=False, selection_method="tournament")'),
-    #('GP_roulette', 'GS_GP(verbose=False, selection_method="roulette")'),
-    #('GP_rank', 'GS_GP(verbose=False, selection_method="rank")'),
+    ('GP_tournament', 'GS_GP(verbose=False, selection_method="tournament")'),
+    ('GP_roulette', 'GS_GP(verbose=False, selection_method="roulette")'),
+    ('GP_rank', 'GS_GP(verbose=False, selection_method="rank")'),
     
     # Special Fitness
-    #('GP_normal_fitness', 'GS_GP(verbose=False, special_fitness=False)'),
-    #('GP_fitness', 'GS_GP(verbose=False, special_fitness=True)'),
+    ('GP_normal_fitness', 'GS_GP(verbose=False, special_fitness=False)'),
+    ('GP_fitness', 'GS_GP(verbose=False, special_fitness=True)'),
     
     # Probabilistic operators
-    #('GP_genotype_operators', 'GS_GP(verbose=False, probabilistic_genotype_operators=True)'),
-    #('GP_phenotype_operators', 'GS_GP(verbose=False, probabilistic_phenotype_operators=True)'),
-    #('GP_genotype_phenotype_operators', 'GS_GP(verbose=False, probabilistic_phenotype_operators=True, probabilistic_genotype_operators=True)')
+    ('GP_genotype_operators', 'GS_GP(verbose=False, probabilistic_operators=False)'),
+    ('GP_phenotype_operators', 'GS_GP(verbose=False, probabilistic_operators=False)')
     
      # Selection Methods GSGP
-    ('GS_GP_tournament', 'GS_GP(verbose=False, selection_method="tournament", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
-    ('GS_GP_roulette', 'GS_GP(verbose=False, selection_method="roulette", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
-    ('GS_GP_rank', 'GS_GP(verbose=False, selection_method="rank", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00, p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
+    #('GS_GP_tournament', 'GS_GP(verbose=False, selection_method="tournament", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
+    #('GS_GP_roulette', 'GS_GP(verbose=False, selection_method="roulette", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
+    #('GS_GP_rank', 'GS_GP(verbose=False, selection_method="rank", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00, p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
     
     # Special Fitness GSGP
-    ('GS_GP_normal_fitness', 'GS_GP(verbose=False, special_fitness=False, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
-    ('GS_GP_fitness', 'GS_GP(verbose=False, special_fitness=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
+    #('GS_GP_normal_fitness', 'GS_GP(verbose=False, special_fitness=False, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
+    #('GS_GP_fitness', 'GS_GP(verbose=False, special_fitness=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
     
     # Probabilistic operators GSGP
-    ('GS_GP_genotype_operators', 'GS_GP(verbose=False, probabilistic_genotype_operators=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
-    ('GS_GP_phenotype_operators', 'GS_GP(verbose=False, probabilistic_phenotype_operators=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
-    ('GS_GP_genotype_phenotype_operators', 'GS_GP(verbose=False, probabilistic_phenotype_operators=True, probabilistic_genotype_operators=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)')
+    #('GS_GP_genotype_operators', 'GS_GP(verbose=False, probabilistic_genotype_operators=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
+    #('GS_GP_phenotype_operators', 'GS_GP(verbose=False, probabilistic_phenotype_operators=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
+    #('GS_GP_genotype_phenotype_operators', 'GS_GP(verbose=False, probabilistic_phenotype_operators=True, probabilistic_genotype_operators=True, gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)')
 
     
         #('GS_GP_neighbors5', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5, semantical_computation=False)'),
