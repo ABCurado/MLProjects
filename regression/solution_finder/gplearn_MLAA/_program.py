@@ -394,7 +394,7 @@ class _Program(object):
         node = self.program[0]
         if isinstance(node, float):
             return np.repeat(node, X.shape[0])
-        if isinstance(node, int):
+        if isinstance(node, (int, np.integer)):
             return X[:, node]
 
         apply_stack = []
