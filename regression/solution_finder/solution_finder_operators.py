@@ -44,7 +44,7 @@ models = [
     #('GP_fitness', 'GS_GP(verbose=False, special_fitness=True)'),
     
     # Probabilistic operators
-    ('GP_no_operator', 'GS_GP(verbose=False, probabilistic_operators=False)'),
+    ('GP_no_operator', 'GS_GP(verbose=False, probabilistic_operators=False, generations = 50)'),
     #('GP_geno_operator', 'GS_GP(verbose=False, probabilistic_operators="geno")'),
     #('GP_naive_operator', 'GS_GP(verbose=False, probabilistic_operators="naive")')
     
@@ -116,6 +116,8 @@ def add_seed(model, seed,X):
         model_eval = model[1][:-1]+",input_dim="+str(X.shape[1])+")"
     elif "GS_GP" in model[0]:
         model_eval = model[1][:-1]+",random_state="+str(seed)+",feature_names="+str(list(X.columns))+")"
+    elif "GP" in model[0]:
+        model_eval = model[1][:-1] + ",random_state=" + str(seed) + ",feature_names=" + str(list(X.columns)) + ")"
     elif "Tree" in model[0]:
         model_eval = model[1][:-1]+",random_state="+str(seed)+")"
     elif "XG" in model[0]:
