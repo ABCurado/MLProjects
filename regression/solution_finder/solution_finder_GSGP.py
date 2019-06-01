@@ -42,7 +42,7 @@ models = [
     #('GS_GP_neighbors5', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5, semantical_computation=False)'),
     #('GS_GP_neighbors10', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=10, semantical_computation=False)'),
     #('GS_GP_neighbors20', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=20)'),
-    #('GS_GP_neighbors0', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=0)')
+    ('GS_GP_neighbors25', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=25)')
     
     # TIE Stopping Criteria 
     #('GS_GP_tie15', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.15, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
@@ -51,14 +51,14 @@ models = [
     #('GS_GP_tie45', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.45, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
     
     # EDV Stopping Criteria
-    ('GS_GP_edv15', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.15, n_semantic_neighbors=5)'),
-    ('GS_GP_edv25', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.25, n_semantic_neighbors=5)'),
-    ('GS_GP_edv35', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.35, n_semantic_neighbors=5)'),
-    ('GS_GP_edv45', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.45, n_semantic_neighbors=5)')
+    #('GS_GP_edv15', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.15, n_semantic_neighbors=5)'),
+    #('GS_GP_edv25', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.25, n_semantic_neighbors=5)'),
+    #('GS_GP_edv35', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.35, n_semantic_neighbors=5)'),
+    #('GS_GP_edv45', 'GS_GP(verbose=False , gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.0, edv_stopping_criteria=0.45, n_semantic_neighbors=5)')
 
 ]
 
-seed = list(range(0,1))
+seed = list(range(0,5))
 
 export_GS_GP_model = False
 
