@@ -335,6 +335,21 @@ def _calculate_phenotypic_weights(func_probs, replacement, parent_raw_fitness, o
                     updated_probs.append((i[0], i[1] + update_rate/(len(func_probs)-1)))
     return updated_probs
 
+
+def _calculate_operator_counts(function_set, feature_names, programs):
+    operators = {operator: 0 for operator in function_set}
+    features = {donor: 0 for donor in range(0, len(feature_names) + 1)}
+
+    for program in programs:
+        for node in program.program:
+            if node in operators:
+                operators[node] += 1
+            if node in features:
+                features[node] += 1
+            else:
+                features[len(features) - 1] += 1
+    return operators, features
+
 def _calculate_phenotypic_weights_term(term_probs, replacement, parent_raw_fitness_, offspring_raw_fitness_):
     updated_probs = []
     update_rate = 0.01
@@ -1065,12 +1080,21 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
 
         file_name = "../log_files/" + "fitness_&_operator_probs_" + str(datetime.datetime.now().hour) + \
                     "_" + str(datetime.datetime.now().minute) + "_log.csv"
+        file_name_2 = "../log_files/" + "programs_" + str(datetime.datetime.now().hour) + \
+                    "_" + str(datetime.datetime.now().minute) + "_log.csv"
+
         with open(file_name, "w") as myfile:
            myfile.write("generation,"+
                         ",".join([str(value) for value in self._function_set]) +"," +
                         ",".join([str(value) for value in self.feature_names]) +
                         ",population_fitness,elite_fitness,val_fitness\n")
 
+        with open(file_name_2, "w") as myfile_2:
+            myfile_2.write("generation" + "," +
+                           ",".join([str(value) for value in self._function_set]) + "," +
+                           ",".join([str(value) for value in self.feature_names]) +
+                           "," + "constant\n"
+                           )
 
         for gen in range(prior_generations, self.generations):
 
@@ -1209,6 +1233,13 @@ class BaseSymbolic(BaseEstimator, metaclass=ABCMeta):
                              ','.join([str(operator[2]) for operator in term_probs]) +
                              "," + str(np.mean(fitness)) + "," + str(best_program.raw_fitness_) +
                              "," + str(val_fitness) + "\n")
+
+            func_counts, term_counts = _calculate_operator_counts(params["function_set"], params["feature_names"], population)
+            with open(file_name_2, "a") as myfile_2:
+                myfile_2.write(str(gen) + "," +
+                             ','.join([str(func_counts[i]) for i in func_counts]) + "," +
+                               ','.join([str(term_counts[i]) for i in term_counts]) + "\n"
+                               )
 
             if self.verbose:
                 self._verbose_reporter(self.run_details_)
