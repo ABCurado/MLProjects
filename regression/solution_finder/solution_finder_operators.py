@@ -35,18 +35,19 @@ models = [
     #('GS_GP', 'GS_GP(verbose=False ,special_fitness=False, generations=50)'),
     
     # Selection Methods
-    #('GP_tournament', 'GS_GP(verbose=False, selection_method="tournament")'),
-    #('GP_roulette', 'GS_GP(verbose=False, selection_method="roulette")'),
-    #('GP_rank', 'GS_GP(verbose=False, selection_method="rank")'),
+    ('GP_tournament', 'GS_GP(verbose=False, selection_method="tournament")'),
+    ('GP_roulette', 'GS_GP(verbose=False, selection_method="roulette")'),
+    ('GP_rank', 'GS_GP(verbose=False, selection_method="rank")'),
     
     # Special Fitness
-    #('GP_normal_fitness', 'GS_GP(verbose=False, special_fitness=False)'),
-    #('GP_fitness', 'GS_GP(verbose=False, special_fitness=True)'),
+    ('GP_normal_fitness', 'GS_GP(verbose=False, special_fitness=False)'),
+    ('GP_fitness', 'GS_GP(verbose=False, special_fitness=True)'),
     
     # Probabilistic operators
-    ('GP_no_operator', 'GS_GP(verbose=False, probabilistic_operators=False, generations = 50)'),
-    #('GP_geno_operator', 'GS_GP(verbose=False, probabilistic_operators="geno")'),
-    #('GP_naive_operator', 'GS_GP(verbose=False, probabilistic_operators="naive")')
+    ('GP_geno_operator', 'GS_GP(verbose=False, probabilistic_operators="geno")'),
+    ('GP_pheno_operator', 'GS_GP(verbose=False, probabilistic_operators="pheno")'),
+    ('GP_naive_operator', 'GS_GP(verbose=False, probabilistic_operators="naive")'),
+    ('GP_no_operator', 'GS_GP(verbose=False, probabilistic_operators=False)'),
     
      # Selection Methods GSGP
     #('GS_GP_tournament', 'GS_GP(verbose=False, selection_method="tournament", gsm_ms=-1, p_gs_mutation=0.01, p_gs_crossover=0.9, p_crossover=0.0, p_subtree_mutation=0.00,          p_hoist_mutation=0.0, p_point_mutation=0.0, p_point_replace=0.0, tie_stopping_criteria=0.25, edv_stopping_criteria=0.0, n_semantic_neighbors=5)'),
@@ -67,7 +68,7 @@ models = [
 
 ]
 
-seed = list(range(0,1))
+seed = list(range(0,5))
 
 export_GS_GP_model = False
 
