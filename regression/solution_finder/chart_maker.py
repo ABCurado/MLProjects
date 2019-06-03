@@ -5,7 +5,7 @@ import pandas as pd
 from itertools import cycle
 # Color Cycle
 cycol = cycle('bgkyrcm')
-df = pd.read_csv('../log_files/fitness_&_operator_probs_19_1_log.csv')
+df = pd.read_csv('../log_files/fitness_&_operator_probs_19_14_log.csv')
 
 df = df.drop(["elite_fitness", "generation", "population_fitness", "val_fitness"], axis=1)
 x = df.index
